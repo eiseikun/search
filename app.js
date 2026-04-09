@@ -97,6 +97,7 @@ window.startEdit = function (id, name, work, url) {
   document.getElementById("url").value = url;
 
   editId = id;
+  document.querySelector(".input-box").classList.add("editing");
 };
 
 // ==============================
