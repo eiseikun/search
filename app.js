@@ -12,7 +12,6 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ⚠️ 自分のFirebase設定に変更
 const firebaseConfig = {
   apiKey: "AIzaSyDJmfV7Vow1e_VjOv06h-n27fWB5KK1l4o",
   authDomain: "search-management-date.firebaseapp.com",
@@ -29,7 +28,20 @@ let editId = null;
 let showDetails = true;
 let currentSort = "main";
 
-// データ取得
+// ==============================
+// 🔽 モーダル
+// ==============================
+window.openModal = function () {
+  document.getElementById("modal").style.display = "block";
+};
+
+window.closeModal = function () {
+  document.getElementById("modal").style.display = "none";
+};
+
+// ==============================
+// 🔽 データ取得
+// ==============================
 onSnapshot(colRef, (snapshot) => {
   lastSnapshot = [];
   snapshot.forEach(docSnap => {
@@ -38,7 +50,9 @@ onSnapshot(colRef, (snapshot) => {
   render();
 });
 
-// 追加・更新
+// ==============================
+// 🔽 追加・更新
+// ==============================
 window.addItem = async function () {
 
   const data = {
@@ -68,36 +82,53 @@ window.addItem = async function () {
     await addDoc(colRef, data);
   }
 
-  document.querySelectorAll("input").forEach(i => i.value = "");
+  document.querySelectorAll("#modal input").forEach(i => i.value = "");
+  closeModal();
 };
 
-// 削除
+// ==============================
+// 🔽 削除
+// ==============================
 window.remove = async function (id) {
   if (!confirm("削除しますか？")) return;
   await deleteDoc(doc(db, "items", id));
 };
 
-// 編集
+// ==============================
+// 🔽 編集（モーダル対応）
+// ==============================
 window.startEdit = function (id, ...vals) {
+
+  openModal();
+
   const ids = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating","authorRating"];
-  ids.forEach((key, i) => document.getElementById(key).value = vals[i] || "");
+  ids.forEach((key, i) => {
+    document.getElementById(key).value = vals[i] || "";
+  });
+
   editId = id;
 };
 
-// 更新日更新
+// ==============================
+// 🔽 更新日
+// ==============================
 window.updateDate = async function (id) {
   await updateDoc(doc(db, "items", id), {
     date: new Date().toLocaleDateString()
   });
 };
 
-// 並び替え
+// ==============================
+// 🔽 並び替え
+// ==============================
 window.sortBy = function (key) {
   currentSort = key;
   render();
 };
 
-// 詳細ON/OFF
+// ==============================
+// 🔽 詳細ON/OFF
+// ==============================
 window.toggleDetails = function () {
   showDetails = !showDetails;
   document.querySelectorAll(".detail").forEach(el => {
@@ -105,7 +136,37 @@ window.toggleDetails = function () {
   });
 };
 
-// 描画
+// ==============================
+// 🔽 列ON/OFF（保存付き）
+// ==============================
+window.toggleColumn = function (index) {
+
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+
+  if (hidden.includes(index)) {
+    hidden.splice(hidden.indexOf(index), 1);
+  } else {
+    hidden.push(index);
+  }
+
+  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
+  applyColumnVisibility();
+};
+
+function applyColumnVisibility() {
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+  const rows = document.querySelectorAll("table tr");
+
+  rows.forEach(row => {
+    [...row.children].forEach((cell, i) => {
+      cell.style.display = hidden.includes(i) ? "none" : "";
+    });
+  });
+}
+
+// ==============================
+// 🔽 描画
+// ==============================
 function render() {
 
   const list = document.getElementById("list");
@@ -118,7 +179,6 @@ function render() {
     d.work?.toLowerCase().includes(keyword)
   );
 
-  // 並び替え
   filtered.sort((a, b) => {
     if (currentSort === "sub") {
       const getStart = s => Number((s || "0").split("~")[0]);
@@ -156,4 +216,6 @@ function render() {
 
     list.appendChild(tr);
   });
+
+  applyColumnVisibility(); // ←これ重要
 }
