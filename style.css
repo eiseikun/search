@@ -58,3 +58,38 @@ td, th {
     width: 90%;
   }
 }
+/* モーダル */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: white;
+  margin: 5% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* 横スクロール */
+table {
+  min-width: 1000px;
+}
+
+body {
+  overflow-x: auto;
+}
