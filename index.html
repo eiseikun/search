@@ -11,24 +11,25 @@
 <body>
 
 <h1>📚 作品管理</h1>
-
 <!-- 🔍 検索 -->
 <div class="search-box">
   <input id="search" placeholder="検索">
   <button onclick="searchNow()">検索</button>
-  <button onclick="toggleColumns()">詳細ON/OFF</button>
+  <button onclick="toggleDetails()">詳細ON/OFF</button>
 </div>
 
 <p id="resultCount"></p>
-
 <!-- ➕ 入力 -->
 <div class="input-box">
 
-  <input id="main" placeholder="大分類 (例:1)">
-  <input id="sub" placeholder="小分類 (例:2~3)">
+  <input id="main" placeholder="大分類">
+  <input id="package" placeholder="パッケージ名">
+  <input id="sub" placeholder="小分類">
 
   <input id="name" placeholder="名前">
-  <input id="work" placeholder="作品">
+  <input id="work" placeholder="作品名">
+  <input id="volume" placeholder="ボリューム">
+
   <input id="url" placeholder="URL">
 
   <input id="fav" placeholder="⭐">
@@ -39,24 +40,26 @@
   <button onclick="addItem()">保存</button>
 
 </div>
-
 <!-- 📋 テーブル -->
 <table>
 <thead>
 <tr>
-  <th>No</th>
+  <th onclick="sortBy('no')">No</th>
   <th onclick="sortBy('main')">大</th>
+  <th onclick="sortBy('package')">パッケージ</th>
   <th onclick="sortBy('sub')">小</th>
   <th onclick="sortBy('name')">名前</th>
   <th onclick="sortBy('work')">作品</th>
+  <th>ボリューム</th>
   <th>URL</th>
 
-  <th class="detail">⭐</th>
-  <th class="detail">評価数</th>
-  <th class="detail">サイト</th>
-  <th class="detail">同人物</th>
-  <th class="detail">日付</th>
+  <th class="detail" onclick="sortBy('fav')">⭐</th>
+  <th class="detail" onclick="sortBy('ratingCount')">評価数</th>
+  <th class="detail" onclick="sortBy('siteRating')">サイト</th>
+  <th class="detail" onclick="sortBy('authorRating')">同人物</th>
+  <th class="detail">更新日</th>
 
+  <th>更新</th>
   <th>編集</th>
   <th>削除</th>
 </tr>
