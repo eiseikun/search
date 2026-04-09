@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>作品管理（Firebase）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Firebase -->
+<script type="module" src="app.js"></script>
+</head>
+
+<body>
+
+<h1>📚 作品管理</h1>
+
+<!-- 🔍 検索 -->
+<input id="search" placeholder="検索（名前・作品）">
+
+<!-- ➕ 追加 -->
+<div>
+  <input id="name" placeholder="名前">
+  <input id="work" placeholder="作品">
+  <input id="url" placeholder="URL">
+  <button onclick="addItem()">追加</button>
+</div>
+
+<!-- 📋 一覧 -->
+<table border="1">
+  <thead>
+    <tr>
+      <th>名前</th>
+      <th>作品</th>
+      <th>URL</th>
+      <th>削除</th>
+    </tr>
+  </thead>
+  <tbody id="list"></tbody>
+</table>
+
+</body>
+</html>
