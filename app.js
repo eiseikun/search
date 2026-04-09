@@ -24,9 +24,31 @@ const db = getFirestore(app);
 
 // コレクション
 const colRef = collection(db, "items");
+// ==============================
+// 状態管理
+// ==============================
+let lastSnapshot = [];
+let currentSort = "name";
+let editId = null;
 
 // ==============================
-// ➕ 追加
+// 🔄 リアルタイム取得
+// ==============================
+onSnapshot(colRef, (snapshot) => {
+  lastSnapshot = [];
+
+  snapshot.forEach(docSnap => {
+    lastSnapshot.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
+
+  render();
+});
+
+// ==============================
+// ➕ 追加 / 更新
 // ==============================
 window.addItem = async function () {
   const name = document.getElementById("name").value;
@@ -35,11 +57,22 @@ window.addItem = async function () {
 
   if (!name || !work) return;
 
-  await addDoc(colRef, {
-    name,
-    work,
-    url
-  });
+  if (editId) {
+    // 更新
+    await updateDoc(doc(db, "items", editId), {
+      name,
+      work,
+      url
+    });
+    editId = null;
+  } else {
+    // 新規
+    await addDoc(colRef, {
+      name,
+      work,
+      url
+    });
+  }
 
   // 入力リセット
   document.getElementById("name").value = "";
@@ -50,44 +83,88 @@ window.addItem = async function () {
 // ==============================
 // 🗑 削除
 // ==============================
-async function remove(id) {
+window.remove = async function (id) {
   await deleteDoc(doc(db, "items", id));
-}
+};
 
 // ==============================
-// 📋 表示（リアルタイム）
+// ✏ 編集開始
 // ==============================
-onSnapshot(colRef, (snapshot) => {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+window.startEdit = function (id, name, work, url) {
+  document.getElementById("name").value = name;
+  document.getElementById("work").value = work;
+  document.getElementById("url").value = url;
 
-  const keyword = document.getElementById("search").value.toLowerCase();
-
-  snapshot.forEach((docSnap) => {
-    const d = docSnap.data();
-    const id = docSnap.id;
-
-    if (
-      d.name.toLowerCase().includes(keyword) ||
-      d.work.toLowerCase().includes(keyword)
-    ) {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${d.name}</td>
-        <td>${d.work}</td>
-        <td><a href="${d.url}" target="_blank">リンク</a></td>
-        <td><button onclick="remove('${id}')">削除</button></td>
-      `;
-
-      list.appendChild(tr);
-    }
-  });
-});
+  editId = id;
+};
 
 // ==============================
 // 🔍 検索
 // ==============================
-document.getElementById("search").addEventListener("input", () => {
-  location.reload(); // 簡易版（あとで改善OK）
+window.searchNow = function () {
+  render();
+};
+
+// Enterキーでも検索
+document.getElementById("search").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") render();
 });
+
+// ==============================
+// ↕ 並び替え
+// ==============================
+window.sortBy = function (key) {
+  currentSort = key;
+  render();
+};
+
+// ==============================
+// 📋 描画
+// ==============================
+function render() {
+  const list = document.getElementById("list");
+  const resultCount = document.getElementById("resultCount");
+
+  list.innerHTML = "";
+
+  const keyword = document.getElementById("search").value.toLowerCase();
+
+  let filtered = lastSnapshot.filter(d =>
+    d.name.toLowerCase().includes(keyword) ||
+    d.work.toLowerCase().includes(keyword)
+  );
+
+  // 並び替え
+  filtered.sort((a, b) =>
+    a[currentSort].localeCompare(b[currentSort])
+  );
+
+  // 件数表示
+  if (keyword) {
+    resultCount.textContent = `検索結果：${filtered.length}件`;
+  } else {
+    resultCount.textContent = `全件数：${filtered.length}件`;
+  }
+
+  // 0件
+  if (filtered.length === 0) {
+    list.innerHTML = `<tr><td colspan="5">該当するデータがありません</td></tr>`;
+    return;
+  }
+
+  // 表示
+  filtered.forEach(d => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${d.name}</td>
+      <td>${d.work}</td>
+      <td><a href="${d.url}" target="_blank">リンク</a></td>
+      <td><button onclick="startEdit('${d.id}', '${d.name}', '${d.work}', '${d.url}')">編集</button></td>
+      <td><button onclick="remove('${d.id}')">削除</button></td>
+    `;
+
+    list.appendChild(tr);
+  });
+}
+
