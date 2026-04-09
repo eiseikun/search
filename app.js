@@ -13,9 +13,9 @@ import {
 
 // ⚠️ 自分のFirebase設定に変更
 const firebaseConfig = {
-  apiKey: "ここにAPIキー",
-  authDomain: "ここにドメイン",
-  projectId: "ここにID",
+  apiKey: "AIzaSyDJmfV7Vow1e_VjOv06h-n27fWB5KK1l4o",
+  authDomain: "search-management-date.firebaseapp.com",
+  projectId: "search-management-date",
 };
 
 // 初期化
