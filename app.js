@@ -85,9 +85,11 @@ window.addItem = async function () {
 // 🗑 削除
 // ==============================
 window.remove = async function (id) {
+
+  if (!confirm("本当に削除しますか？")) return;
+
   await deleteDoc(doc(db, "items", id));
 };
-
 // ==============================
 // ✏ 編集開始
 // ==============================
