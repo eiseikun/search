@@ -19,26 +19,36 @@
 </div>
 
 <p id="resultCount"></p>
-<!-- ➕ 入力 -->
-<div class="input-box">
+<!-- ＋ボタン -->
+<div style="text-align:center; margin:10px;">
+  <button onclick="openModal()">＋ 追加</button>
+</div>
 
-  <input id="main" placeholder="大分類">
-  <input id="package" placeholder="パッケージ名">
-  <input id="sub" placeholder="小分類">
+<!-- モーダル -->
+<div id="modal" class="modal">
+  <div class="modal-content">
 
-  <input id="name" placeholder="名前">
-  <input id="work" placeholder="作品名">
-  <input id="volume" placeholder="ボリューム">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2>作品登録 / 編集</h2>
 
-  <input id="url" placeholder="URL">
+    <input id="main" placeholder="大分類">
+    <input id="package" placeholder="パッケージ名">
+    <input id="sub" placeholder="小分類">
 
-  <input id="fav" placeholder="⭐">
-  <input id="ratingCount" placeholder="評価数">
-  <input id="siteRating" placeholder="サイト評価">
-  <input id="authorRating" placeholder="同人物評価">
+    <input id="name" placeholder="名前">
+    <input id="work" placeholder="作品名">
+    <input id="volume" placeholder="ボリューム">
 
-  <button onclick="addItem()">保存</button>
+    <input id="url" placeholder="URL">
 
+    <input id="fav" placeholder="⭐">
+    <input id="ratingCount" placeholder="評価数">
+    <input id="siteRating" placeholder="サイト評価">
+    <input id="authorRating" placeholder="同人物評価">
+
+    <button onclick="addItem()">保存</button>
+
+  </div>
 </div>
 <!-- 📋 テーブル -->
 <table>
