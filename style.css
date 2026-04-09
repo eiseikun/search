@@ -1,20 +1,17 @@
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: sans-serif;
   background: #eef1f5;
   padding: 20px;
-  margin: 0;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
 }
 
-/* 共通カード */
 .search-box,
 .input-box,
 table {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto 15px;
   background: white;
   padding: 15px;
@@ -22,116 +19,62 @@ table {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* 入力 */
 input {
-  padding: 10px;
+  padding: 8px;
   margin: 5px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  width: 200px;
-  transition: 0.2s;
 }
 
-input:focus {
-  outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 5px rgba(76,175,80,0.4);
-}
-
-/* ボタン共通 */
 button {
-  padding: 9px 14px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-/* 保存ボタン */
-button {
   background: #4CAF50;
   color: white;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  opacity: 0.9;
-}
-
-/* 編集ボタン */
 button[onclick^="startEdit"] {
   background: #ff9800;
 }
 
-/* 削除ボタン */
 button[onclick^="remove"] {
   background: #f44336;
 }
 
-/* テーブル */
 table {
   width: 100%;
   border-collapse: collapse;
-  overflow: hidden;
 }
 
 th {
   background: #333;
   color: white;
-  padding: 12px;
-  cursor: pointer;
+  padding: 10px;
 }
 
 td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
-tr:hover {
-  background: #f9f9f9;
+.detail {
+  display: table-cell;
 }
 
-/* リンク */
-a {
-  color: #2196F3;
-  text-decoration: none;
+.editing {
+  border: 2px solid orange;
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-/* 件数 */
 #resultCount {
   text-align: center;
-  margin: 10px;
   font-weight: bold;
 }
 
-/* 編集中（あとでJSと連動） */
-.editing {
-  border: 2px solid #ff9800 !important;
-  background: #fff8e1;
-}
-
-/* スマホ */
 @media (max-width: 600px) {
-
-  input {
+  input, button {
     width: 90%;
-  }
-
-  button {
-    width: 90%;
-    margin-top: 5px;
-  }
-
-  table {
-    font-size: 12px;
-  }
-
-  th, td {
-    padding: 8px;
   }
 }
