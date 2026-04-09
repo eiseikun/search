@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>作品管理（Firebase）</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
 <script type="module" src="app.js"></script>
 </head>
 
@@ -16,23 +14,29 @@
 <h1>📚 作品管理</h1>
 
 <!-- 🔍 検索 -->
-<input id="search" placeholder="検索（名前・作品）">
+<div class="search-box">
+  <input id="search" placeholder="検索（名前・作品）">
+  <button onclick="searchNow()">検索</button>
+</div>
 
-<!-- ➕ 追加 -->
-<div>
+<p id="resultCount"></p>
+
+<!-- ➕ 追加・編集 -->
+<div class="input-box">
   <input id="name" placeholder="名前">
   <input id="work" placeholder="作品">
   <input id="url" placeholder="URL">
-  <button onclick="addItem()">追加</button>
+  <button onclick="addItem()">保存</button>
 </div>
 
 <!-- 📋 一覧 -->
-<table border="1">
+<table>
   <thead>
     <tr>
-      <th>名前</th>
-      <th>作品</th>
+      <th onclick="sortBy('name')">名前</th>
+      <th onclick="sortBy('work')">作品</th>
       <th>URL</th>
+      <th>編集</th>
       <th>削除</th>
     </tr>
   </thead>
