@@ -8,43 +8,47 @@ h1 {
   text-align: center;
 }
 
-.search-box, .column-toggle, .table-wrap, .top-bar {
+/* 検索バー */
+.search-bar {
   max-width: 1100px;
-  margin: 0 auto 15px;
+  margin: 0 auto 10px;
+  display: flex;
+  gap: 10px;
   background: white;
-  padding: 15px;
+  padding: 10px;
   border-radius: 12px;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.column-toggle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-input {
+.search-bar input {
+  flex: 1;
   padding: 8px;
-  margin: 5px;
 }
 
+.result-bar {
+  max-width: 1100px;
+  margin: 0 auto 10px;
+  text-align: right;
+  color: #666;
+}
+
+/* ボタン */
 button {
-  padding: 6px 10px;
-  border-radius: 6px;
+  background: #4a90e2;
+  color: white;
   border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
   cursor: pointer;
 }
 
 button:hover {
-  opacity: 0.8;
+  background: #357abd;
 }
 
+/* テーブル */
 .table-wrap {
+  max-width: 1100px;
+  margin: auto;
   overflow-x: auto;
 }
 
@@ -52,10 +56,13 @@ table {
   width: 100%;
   min-width: 1000px;
   border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 th {
-  background: #333;
+  background: #222;
   color: white;
   cursor: pointer;
 }
@@ -66,11 +73,11 @@ td, th {
   border-bottom: 1px solid #ddd;
 }
 
-td a {
-  color: blue;
-  text-decoration: underline;
+tr:hover {
+  background: #f5f7fa;
 }
 
+/* モーダル */
 .modal {
   display: none;
   position: fixed;
@@ -89,8 +96,6 @@ td a {
   width: 90%;
   max-width: 500px;
   border-radius: 12px;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 .close {
@@ -99,20 +104,9 @@ td a {
   cursor: pointer;
 }
 
-@media (max-width: 600px) {
-  body { padding: 10px; }
-  h1 { font-size: 18px; }
-
-  .top-bar {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  input { width: 100%; margin: 0; }
-  button { width: 100%; }
-
-  td, th {
-    font-size: 12px;
-    padding: 6px;
-  }
+/* 列設定 */
+.column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
