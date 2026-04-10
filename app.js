@@ -138,11 +138,11 @@ function applyColumnVisibility(){
 }
 
 function showAllColumns(){
-  for (let row of list.children){
-    for (let cell of row.children){
+  document.querySelectorAll("table tr").forEach(row=>{
+    Array.from(row.children).forEach(cell=>{
       cell.style.display = "";
-    }
-  }
+    });
+  });
 }
 
 function applyCheckboxState(){
