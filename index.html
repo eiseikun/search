@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>管理サイト</title>
+<title>管理ページ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,7 +14,21 @@
   <input type="text" id="search" placeholder="検索...">
 </div>
 
-<div class="column-toggle" id="columnToggle"></div>
+<div class="column-toggle">
+  <!-- data-colは列番号 -->
+  <label><input type="checkbox" data-col="1" checked>大</label>
+  <label><input type="checkbox" data-col="2" checked>パック</label>
+  <label><input type="checkbox" data-col="3" checked>小</label>
+  <label><input type="checkbox" data-col="4" checked>名前</label>
+  <label><input type="checkbox" data-col="5" checked>作品</label>
+  <label><input type="checkbox" data-col="6" checked>量</label>
+  <label><input type="checkbox" data-col="7" checked>URL</label>
+  <label><input type="checkbox" data-col="8" checked>⭐</label>
+  <label><input type="checkbox" data-col="9" checked>評価数</label>
+  <label><input type="checkbox" data-col="10" checked>サイト</label>
+  <label><input type="checkbox" data-col="11" checked>作者</label>
+  <label><input type="checkbox" data-col="12" checked>更新日</label>
+</div>
 
 <div style="text-align:center;">
   <button onclick="toggleDetails()">詳細ON/OFF</button>
@@ -24,20 +38,23 @@
 <table>
 <thead>
 <tr>
+<th>#</th>
 <th onclick="sortBy('main')">大</th>
 <th onclick="sortBy('package')">パック</th>
 <th onclick="sortBy('sub')">小</th>
 <th onclick="sortBy('name')">名前</th>
 <th onclick="sortBy('work')">作品</th>
 <th onclick="sortBy('volume')">量</th>
+<th>URL</th>
 <th onclick="sortBy('fav')">⭐</th>
 <th onclick="sortBy('ratingCount')">評価数</th>
 <th onclick="sortBy('siteRating')">サイト</th>
 <th onclick="sortBy('authorRating')">作者</th>
+<th onclick="sortBy('updated')">更新日</th>
 <th>操作</th>
 </tr>
 </thead>
-<tbody id="tableBody"></tbody>
+<tbody id="list"></tbody>
 </table>
 </div>
 
@@ -45,16 +62,18 @@
   <button onclick="openModal()">＋追加</button>
 </div>
 
+<input type="file" id="fileInput">
+
 <!-- モーダル -->
 <div id="modal" class="modal">
 <div class="modal-content">
 <span class="close" onclick="closeModal()">&times;</span>
 
 <input id="main" placeholder="大分類">
-<input id="work" placeholder="作品">
-<input id="name" placeholder="名前">
 <input id="package" placeholder="パック">
 <input id="sub" placeholder="小分類">
+<input id="name" placeholder="名前">
+<input id="work" placeholder="作品">
 <input id="volume" placeholder="量">
 <input id="url" placeholder="URL">
 <input id="fav" placeholder="⭐">
@@ -62,7 +81,7 @@
 <input id="siteRating" placeholder="サイト評価">
 <input id="authorRating" placeholder="作者評価">
 
-<button onclick="saveData()">保存</button>
+<button onclick="addItem()">保存</button>
 
 </div>
 </div>
