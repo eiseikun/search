@@ -9,6 +9,7 @@ const firebaseConfig = {
   projectId: "search-management-date",
 };
 
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
@@ -87,49 +88,58 @@ window.updateDate = async id => {
 
 // 並び替え
 window.sortBy = key => {
-  if (currentSort === key) {
-    sortAsc = !sortAsc;
-  } else {
+  if (currentSort === key) sortAsc = !sortAsc;
+  else {
     currentSort = key;
     sortAsc = true;
   }
   render();
 };
 
-// 詳細
+// ⭐表示更新ボタン
 window.toggleDetails = () => {
+
   showDetails = !showDetails;
+
+  // 詳細列表示
   document.querySelectorAll(".detail").forEach(el=>{
     el.style.display = showDetails ? "" : "none";
   });
-};
 
-// 列表示
-window.toggleColumn = index => {
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
-  hidden.includes(index)
-    ? hidden.splice(hidden.indexOf(index),1)
-    : hidden.push(index);
-  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
+  // 列チェック反映
   applyColumnVisibility();
 };
 
+// チェック変更（即反映しない）
+document.querySelectorAll("[data-col]").forEach(cb=>{
+  cb.addEventListener("change", ()=>{
+    const index = Number(cb.dataset.col);
+    const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+
+    if (cb.checked) {
+      const i = hidden.indexOf(index);
+      if (i !== -1) hidden.splice(i,1);
+    } else {
+      if (!hidden.includes(index)) hidden.push(index);
+    }
+
+    localStorage.setItem("hiddenCols", JSON.stringify(hidden));
+  });
+});
+
+// 列適用
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 
   document.querySelectorAll("table tr").forEach(row=>{
     Array.from(row.children).forEach((cell, i)=>{
-
-      if (i >= 13) {
-        cell.style.display = "";
-        return;
-      }
-
+      if (i >= 13) return;
       cell.style.display = hidden.includes(i) ? "none" : "";
     });
   });
 }
 
+// チェック同期
 function applyCheckboxState(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   document.querySelectorAll("[data-col]").forEach(cb=>{
@@ -189,6 +199,6 @@ window.render = function(){
 </tr>`;
   });
 
-  applyColumnVisibility();
   applyCheckboxState();
+  applyColumnVisibility();
 };
