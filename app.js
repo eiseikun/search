@@ -25,8 +25,13 @@ let showDetails = true;
 let currentSort = "main";
 
 // モーダル
-window.openModal = () => modal.style.display = "block";
-window.closeModal = () => modal.style.display = "none";
+window.openModal = () => {
+  document.getElementById("modal").style.display = "block";
+};
+
+window.closeModal = () => {
+  document.getElementById("modal").style.display = "none";
+};
 
 // データ取得
 onSnapshot(colRef, snap => {
