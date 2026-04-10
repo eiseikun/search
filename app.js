@@ -123,13 +123,18 @@ document.addEventListener("change", e=>{
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 
-  for (let row of list.children){
+  const rows = document.querySelectorAll("table tr"); // ← ここ重要
+
+  rows.forEach(row=>{
     const cells = row.children;
+
     for (let i = 0; i < cells.length; i++){
-      if (i >= 13) continue;
+      if (i === 0) continue; // No列は常に表示
+      if (i >= cells.length - 3) continue; // 更新・編集・削除は表示
+
       cells[i].style.display = hidden.includes(i) ? "none" : "";
     }
-  }
+  });
 }
 
 function showAllColumns(){
