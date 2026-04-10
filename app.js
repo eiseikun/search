@@ -193,10 +193,10 @@ window.render = function(){
   });
 
   resultCount.textContent = `${data.length}件`;
-  list.innerHTML = "";
+  let html = "";
 
-  data.forEach((d,i)=>{
-    list.innerHTML += `
+data.forEach((d,i)=>{
+  html += `
 <tr>
 <td>${i+1}</td>
 <td>${d.main}</td>
@@ -217,7 +217,9 @@ window.render = function(){
 <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.authorRating}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
-  });
+});
+
+list.innerHTML = html;
 
   applyCheckboxState();
 
