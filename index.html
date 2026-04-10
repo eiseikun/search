@@ -11,13 +11,15 @@
 <body>
 
 <h1>📚 作品管理</h1>
+
 <!-- 🔍 検索 -->
 <div class="search-box">
-<input id="search" placeholder="検索" oninput="render()">
-<button onclick="toggleDetails()">詳細ON/OFF</button>
+  <input id="search" placeholder="検索" oninput="render()">
+  <button onclick="toggleDetails()">詳細ON/OFF</button>
 </div>
-  
-<div style="text-align:center; margin-bottom:10px;">
+
+<!-- 列表示 -->
+<div class="column-toggle">
   列表示：
   <label><input type="checkbox" data-col="1" onchange="toggleColumn(1)">大</label>
   <label><input type="checkbox" data-col="2" onchange="toggleColumn(2)">パッケージ</label>
@@ -25,10 +27,11 @@
   <label><input type="checkbox" data-col="4" onchange="toggleColumn(4)">名前</label>
   <label><input type="checkbox" data-col="5" onchange="toggleColumn(5)">作品</label>
 </div>
-  
+
 <p id="resultCount"></p>
+
 <!-- ＋ボタン -->
-<div style="text-align:center; margin:10px;">
+<div class="add-btn">
   <button onclick="openModal()">＋ 追加</button>
 </div>
 
@@ -58,11 +61,13 @@
 
   </div>
 </div>
+
 <!-- 📋 テーブル -->
+<div class="table-wrap">
 <table>
 <thead>
 <tr>
-  <th onclick="sortBy('no')">No</th>
+  <th>No</th>
   <th onclick="sortBy('main')">大</th>
   <th onclick="sortBy('package')">パッケージ</th>
   <th onclick="sortBy('sub')">小</th>
@@ -85,6 +90,7 @@
 
 <tbody id="list"></tbody>
 </table>
+</div>
 
 </body>
 </html>
