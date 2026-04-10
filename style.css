@@ -16,12 +16,6 @@ h1 {
   border-radius: 12px;
 }
 
-.column-toggle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
 input {
   padding: 8px;
   margin: 5px;
@@ -44,14 +38,13 @@ button:hover {
 
 table {
   width: 100%;
-  min-width: 1000px;
+  min-width: 1100px;
   border-collapse: collapse;
 }
 
 th {
   background: #333;
   color: white;
-  cursor: pointer;
 }
 
 td, th {
@@ -60,11 +53,7 @@ td, th {
   border-bottom: 1px solid #ddd;
 }
 
-td a {
-  color: blue;
-  text-decoration: underline;
-}
-
+/* モーダル */
 .modal {
   display: none;
   position: fixed;
@@ -83,8 +72,6 @@ td a {
   width: 90%;
   max-width: 500px;
   border-radius: 12px;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 .close {
@@ -98,21 +85,24 @@ td a {
   margin: 10px;
 }
 
+/* スマホ */
 @media (max-width: 600px) {
-  body { padding: 10px; }
-  h1 { font-size: 18px; }
 
-  .search-box {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  body {
+    padding: 10px;
   }
 
-  input { width: 100%; margin: 0; }
-  button { width: 100%; padding: 10px; }
+  h1 {
+    font-size: 18px;
+  }
 
-  td, th {
-    font-size: 12px;
-    padding: 6px;
+  input {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
   }
 }
