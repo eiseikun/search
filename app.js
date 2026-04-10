@@ -16,24 +16,29 @@ const colRef = collection(db, "items");
 let lastSnapshot = [];
 let editId = null;
 let showDetails = true;
-let useColumnFilter = false; // ← 追加（列フィルタON/OFF）
+let useColumnFilter = false;
 let currentSort = "main";
 let sortAsc = true;
 
-// モーダル
-window.openModal = () => document.getElementById("modal").style.display = "block";
-window.closeModal = () => document.getElementById("modal").style.display = "none";
+/* モーダル */
+window.openModal = () => modal.style.display = "block";
+window.closeModal = () => modal.style.display = "none";
 
-// データ取得
+window.openColumnModal = () => {
+  columnModal.style.display = "block";
+  applyCheckboxState();
+};
+window.closeColumnModal = () => columnModal.style.display = "none";
+
+/* データ取得 */
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-// 追加・更新
+/* 追加・更新 */
 window.addItem = async () => {
-
   const val = id => document.getElementById(id).value;
 
   const data = {
@@ -51,10 +56,7 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.main || !data.sub || !data.name || !data.work) {
-    alert("必須項目入力");
-    return;
-  }
+  if (!data.main || !data.sub || !data.name || !data.work) return alert("必須項目入力");
 
   if (editId) {
     await updateDoc(doc(db, "items", editId), data);
@@ -67,13 +69,13 @@ window.addItem = async () => {
   closeModal();
 };
 
-// 削除
+/* 削除 */
 window.remove = async id => {
   if (!confirm("削除しますか？")) return;
   await deleteDoc(doc(db, "items", id));
 };
 
-// 編集
+/* 編集 */
 window.startEdit = (id, ...vals) => {
   openModal();
   const keys = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating","authorRating"];
@@ -81,85 +83,63 @@ window.startEdit = (id, ...vals) => {
   editId = id;
 };
 
-// 更新日
+/* 更新日 */
 window.updateDate = async id => {
   await updateDoc(doc(db,"items",id),{date:new Date().toLocaleDateString()});
 };
 
-// 並び替え
+/* ソート */
 window.sortBy = key => {
   if (currentSort === key) sortAsc = !sortAsc;
-  else {
-    currentSort = key;
-    sortAsc = true;
-  }
+  else { currentSort = key; sortAsc = true; }
   render();
 };
 
-// ⭐表示＋列切替ボタン
+/* 切替 */
 window.toggleDetails = () => {
-
-  // 列フィルタ切替（これがメイン）
   useColumnFilter = !useColumnFilter;
-
-  if (useColumnFilter) {
-    applyColumnVisibility(); // チェック列のみ
-  } else {
-    showAllColumns(); // 全表示
-  }
-
-  // 詳細列も同時にON/OFF
   showDetails = !showDetails;
-  document.querySelectorAll(".detail").forEach(el=>{
-    el.style.display = showDetails ? "" : "none";
-  });
-
-  // ボタン名変更（任意）
-  const btn = document.querySelector(".search-box button");
-  if (btn) {
-    btn.textContent = useColumnFilter ? "全表示" : "選択列のみ";
-  }
+  render();
 };
 
-// チェック変更（保存のみ・即反映しない）
-document.querySelectorAll("[data-col]").forEach(cb=>{
-  cb.addEventListener("change", ()=>{
-    const index = Number(cb.dataset.col);
-    const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+/* チェック保存 */
+document.addEventListener("change", e=>{
+  if(!e.target.dataset.col) return;
 
-    if (cb.checked) {
-      const i = hidden.indexOf(index);
-      if (i !== -1) hidden.splice(i,1);
-    } else {
-      if (!hidden.includes(index)) hidden.push(index);
-    }
+  const index = Number(e.target.dataset.col);
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
 
-    localStorage.setItem("hiddenCols", JSON.stringify(hidden));
-  });
+  if (e.target.checked) {
+    const i = hidden.indexOf(index);
+    if (i !== -1) hidden.splice(i,1);
+  } else {
+    if (!hidden.includes(index)) hidden.push(index);
+  }
+
+  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
 });
 
-// 列適用（チェック列のみ表示）
+/* 列制御 */
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 
-  document.querySelectorAll("table tr").forEach(row=>{
-    Array.from(row.children).forEach((cell, i)=>{
-      if (i >= 13) return; // 操作列は常に表示
-      cell.style.display = hidden.includes(i) ? "none" : "";
-    });
-  });
+  for (let row of list.children){
+    const cells = row.children;
+    for (let i = 0; i < cells.length; i++){
+      if (i >= 13) continue;
+      cells[i].style.display = hidden.includes(i) ? "none" : "";
+    }
+  }
 }
 
-// 全表示
 function showAllColumns(){
-  document.querySelectorAll("table tr").forEach(row=>{
-    Array.from(row.children).forEach(cell=>{
+  for (let row of list.children){
+    for (let cell of row.children){
       cell.style.display = "";
-    });
-  });
+    }
+  }
 }
 
-// チェック同期
 function applyCheckboxState(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   document.querySelectorAll("[data-col]").forEach(cb=>{
@@ -167,7 +147,7 @@ function applyCheckboxState(){
   });
 }
 
-// 描画
+/* 描画 */
 window.render = function(){
 
   const keyword = search.value.toLowerCase();
@@ -178,25 +158,18 @@ window.render = function(){
   );
 
   data.sort((a,b)=>{
-    let valA = a[currentSort] || "";
-    let valB = b[currentSort] || "";
-
-    if(currentSort==="sub"){
-      const f = s=>Number((s||"0").split("~")[0]);
-      valA = f(valA);
-      valB = f(valB);
-    }
-
-    if (valA > valB) return sortAsc ? 1 : -1;
-    if (valA < valB) return sortAsc ? -1 : 1;
+    let A = a[currentSort] || "";
+    let B = b[currentSort] || "";
+    if (A > B) return sortAsc ? 1 : -1;
+    if (A < B) return sortAsc ? -1 : 1;
     return 0;
   });
 
   resultCount.textContent = `${data.length}件`;
-  let html = "";
 
-data.forEach((d,i)=>{
-  html += `
+  let html = "";
+  data.forEach((d,i)=>{
+    html += `
 <tr>
 <td>${i+1}</td>
 <td>${d.main}</td>
@@ -217,17 +190,14 @@ data.forEach((d,i)=>{
 <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.authorRating}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
-});
+  });
 
-list.innerHTML = html;
+  list.innerHTML = html;
 
-  applyCheckboxState();
+  if (useColumnFilter) applyColumnVisibility();
+  else showAllColumns();
 
-  // 初期状態は「全表示」
-  if (useColumnFilter) {
-    applyColumnVisibility();
-  } else {
-    showAllColumns();
-  }
+  document.querySelectorAll(".detail").forEach(el=>{
+    el.style.display = showDetails ? "" : "none";
+  });
 };
-
