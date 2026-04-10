@@ -91,10 +91,17 @@ td, th {
 
 /* ＋ボタン */
 .add-btn {
-  text-align: center;
-  margin: 10px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
 }
 
+.add-btn button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 20px;
+}
 /* スマホ */
 @media (max-width: 600px) {
 
@@ -123,6 +130,12 @@ td, th {
   }
 
   .modal-content {
-    margin-top: 10px;
-  }
+  max-height: 80vh;
+  overflow-y: auto;
+}
+}
+.column-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
