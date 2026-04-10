@@ -118,14 +118,24 @@ window.toggleColumn = index => {
 };
 
 function applyColumnVisibility(){
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+
   document.querySelectorAll("table tr").forEach(row=>{
-    Array.from(row.children).forEach((cell,i)=>{
-      if(hidden.includes(i)){
+    Array.from(row.children).forEach((cell, i)=>{
+
+      // ✅ 操作列は固定表示（ここが今回のキモ）
+      if (i >= 13) {
+        cell.style.display = "";
+        return;
+      }
+
+      // 通常の表示/非表示
+      if (hidden.includes(i)) {
         cell.style.display = "none";
-      }else{
+      } else {
         cell.style.display = "";
       }
+
     });
   });
 }
