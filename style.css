@@ -8,7 +8,6 @@ h1 {
   text-align: center;
 }
 
-/* 共通ボックス */
 .search-box, .column-toggle, .table-wrap {
   max-width: 1100px;
   margin: 0 auto 15px;
@@ -17,13 +16,17 @@ h1 {
   border-radius: 12px;
 }
 
-/* 入力 */
+.column-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 input {
   padding: 8px;
   margin: 5px;
 }
 
-/* ボタン */
 button {
   padding: 6px 10px;
   border-radius: 6px;
@@ -35,7 +38,6 @@ button:hover {
   opacity: 0.8;
 }
 
-/* テーブル */
 .table-wrap {
   overflow-x: auto;
 }
@@ -58,11 +60,11 @@ td, th {
   border-bottom: 1px solid #ddd;
 }
 
-.detail {
-  display: table-cell;
+td a {
+  color: blue;
+  text-decoration: underline;
 }
 
-/* モーダル */
 .modal {
   display: none;
   position: fixed;
@@ -81,6 +83,8 @@ td, th {
   width: 90%;
   max-width: 500px;
   border-radius: 12px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .close {
@@ -89,29 +93,14 @@ td, th {
   cursor: pointer;
 }
 
-/* ＋ボタン */
 .add-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+  text-align: center;
+  margin: 10px;
 }
 
-.add-btn button {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  font-size: 20px;
-}
-/* スマホ */
 @media (max-width: 600px) {
-
-  body {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 18px;
-  }
+  body { padding: 10px; }
+  h1 { font-size: 18px; }
 
   .search-box {
     display: flex;
@@ -119,23 +108,11 @@ td, th {
     gap: 8px;
   }
 
-  input {
-    width: 100%;
-    margin: 0;
-  }
+  input { width: 100%; margin: 0; }
+  button { width: 100%; padding: 10px; }
 
-  button {
-    width: 100%;
-    padding: 10px;
+  td, th {
+    font-size: 12px;
+    padding: 6px;
   }
-
-  .modal-content {
-  max-height: 80vh;
-  overflow-y: auto;
-}
-}
-.column-toggle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
 }
