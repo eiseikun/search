@@ -17,7 +17,16 @@
   <button onclick="searchNow()">検索</button>
   <button onclick="toggleDetails()">詳細ON/OFF</button>
 </div>
-
+  
+<div style="text-align:center; margin-bottom:10px;">
+  列表示：
+  <label><input type="checkbox" onchange="toggleColumn(1)">大</label>
+  <label><input type="checkbox" onchange="toggleColumn(2)">パッケージ</label>
+  <label><input type="checkbox" onchange="toggleColumn(3)">小</label>
+  <label><input type="checkbox" onchange="toggleColumn(4)">名前</label>
+  <label><input type="checkbox" onchange="toggleColumn(5)">作品</label>
+</div>
+  
 <p id="resultCount"></p>
 <!-- ＋ボタン -->
 <div style="text-align:center; margin:10px;">
