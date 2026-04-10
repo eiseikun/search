@@ -34,7 +34,7 @@ button {
 
 table {
   width: 100%;
-  min-width: 1100px;
+  min-width: 1000px;
   border-collapse: collapse;
 }
 
@@ -50,7 +50,6 @@ td, th {
   border-bottom: 1px solid #ddd;
 }
 
-/* モーダル */
 .modal {
   display: none;
   position: fixed;
@@ -75,12 +74,7 @@ td, th {
   cursor: pointer;
 }
 
-.add-btn {
-  text-align: center;
-}
-
 @media (max-width: 600px) {
-  input, button {
-    width: 100%;
-  }
+  body { padding: 10px; }
+  input, button { width: 100%; }
 }
