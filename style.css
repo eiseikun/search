@@ -8,12 +8,18 @@ h1 {
   text-align: center;
 }
 
-.search-box, .column-toggle, .table-wrap {
+.search-box, .column-toggle, .table-wrap, .top-bar {
   max-width: 1100px;
   margin: 0 auto 15px;
   background: white;
   padding: 15px;
   border-radius: 12px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .column-toggle {
@@ -93,23 +99,17 @@ td a {
   cursor: pointer;
 }
 
-.add-btn {
-  text-align: center;
-  margin: 10px;
-}
-
 @media (max-width: 600px) {
   body { padding: 10px; }
   h1 { font-size: 18px; }
 
-  .search-box {
-    display: flex;
+  .top-bar {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 
   input { width: 100%; margin: 0; }
-  button { width: 100%; padding: 10px; }
+  button { width: 100%; }
 
   td, th {
     font-size: 12px;
