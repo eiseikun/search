@@ -120,8 +120,12 @@ window.toggleColumn = index => {
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   document.querySelectorAll("table tr").forEach(row=>{
-    [...row.children].forEach((cell,i)=>{
-      cell.style.display = hidden.includes(i) ? "none" : "";
+    Array.from(row.children).forEach((cell,i)=>{
+      if(hidden.includes(i)){
+        cell.style.display = "none";
+      }else{
+        cell.style.display = "";
+      }
     });
   });
 }
