@@ -9,7 +9,6 @@ const firebaseConfig = {
   projectId: "search-management-date",
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
@@ -17,6 +16,7 @@ const colRef = collection(db, "items");
 let lastSnapshot = [];
 let editId = null;
 let showDetails = true;
+let useColumnFilter = false; // ← 追加（列フィルタON/OFF）
 let currentSort = "main";
 let sortAsc = true;
 
@@ -96,21 +96,32 @@ window.sortBy = key => {
   render();
 };
 
-// ⭐表示更新ボタン
+// ⭐表示＋列切替ボタン
 window.toggleDetails = () => {
 
-  showDetails = !showDetails;
+  // 列フィルタ切替（これがメイン）
+  useColumnFilter = !useColumnFilter;
 
-  // 詳細列表示
+  if (useColumnFilter) {
+    applyColumnVisibility(); // チェック列のみ
+  } else {
+    showAllColumns(); // 全表示
+  }
+
+  // 詳細列も同時にON/OFF
+  showDetails = !showDetails;
   document.querySelectorAll(".detail").forEach(el=>{
     el.style.display = showDetails ? "" : "none";
   });
 
-  // 列チェック反映
-  applyColumnVisibility();
+  // ボタン名変更（任意）
+  const btn = document.querySelector(".search-box button");
+  if (btn) {
+    btn.textContent = useColumnFilter ? "全表示" : "選択列のみ";
+  }
 };
 
-// チェック変更（即反映しない）
+// チェック変更（保存のみ・即反映しない）
 document.querySelectorAll("[data-col]").forEach(cb=>{
   cb.addEventListener("change", ()=>{
     const index = Number(cb.dataset.col);
@@ -127,14 +138,23 @@ document.querySelectorAll("[data-col]").forEach(cb=>{
   });
 });
 
-// 列適用
+// 列適用（チェック列のみ表示）
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 
   document.querySelectorAll("table tr").forEach(row=>{
     Array.from(row.children).forEach((cell, i)=>{
-      if (i >= 13) return;
+      if (i >= 13) return; // 操作列は常に表示
       cell.style.display = hidden.includes(i) ? "none" : "";
+    });
+  });
+}
+
+// 全表示
+function showAllColumns(){
+  document.querySelectorAll("table tr").forEach(row=>{
+    Array.from(row.children).forEach(cell=>{
+      cell.style.display = "";
     });
   });
 }
@@ -200,5 +220,12 @@ window.render = function(){
   });
 
   applyCheckboxState();
-  applyColumnVisibility();
+
+  // 初期状態は「全表示」
+  if (useColumnFilter) {
+    applyColumnVisibility();
+  } else {
+    showAllColumns();
+  }
 };
+
