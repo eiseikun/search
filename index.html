@@ -12,13 +12,11 @@
 
 <h1>📚 作品管理</h1>
 
-<!-- 🔍 検索 -->
 <div class="search-box">
   <input id="search" placeholder="検索" oninput="render()">
   <button onclick="toggleDetails()">詳細ON/OFF</button>
 </div>
 
-<!-- 列表示 -->
 <div class="column-toggle">
   列表示：
   <label><input type="checkbox" data-col="1" onchange="toggleColumn(1)">大</label>
@@ -37,15 +35,12 @@
 
 <p id="resultCount"></p>
 
-<!-- ＋ボタン -->
 <div class="add-btn">
   <button onclick="openModal()">＋ 追加</button>
 </div>
 
-<!-- モーダル -->
 <div id="modal" class="modal">
   <div class="modal-content">
-
     <span class="close" onclick="closeModal()">&times;</span>
     <h2>作品登録 / 編集</h2>
 
@@ -65,11 +60,9 @@
     <input id="authorRating" placeholder="同人物評価">
 
     <button onclick="addItem()">保存</button>
-
   </div>
 </div>
 
-<!-- 📋 テーブル -->
 <div class="table-wrap">
 <table>
 <thead>
