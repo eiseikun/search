@@ -1,12 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  updateDoc
+  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -23,15 +17,11 @@ let lastSnapshot = [];
 let editId = null;
 let showDetails = true;
 let currentSort = "main";
+let sortAsc = true;
 
 // モーダル
-window.openModal = () => {
-  document.getElementById("modal").style.display = "block";
-};
-
-window.closeModal = () => {
-  document.getElementById("modal").style.display = "none";
-};
+window.openModal = () => document.getElementById("modal").style.display = "block";
+window.closeModal = () => document.getElementById("modal").style.display = "none";
 
 // データ取得
 onSnapshot(colRef, snap => {
@@ -43,18 +33,20 @@ onSnapshot(colRef, snap => {
 // 追加・更新
 window.addItem = async () => {
 
+  const val = id => document.getElementById(id).value;
+
   const data = {
-    main: Number(main.value),
-    package: package.value,
-    sub: sub.value,
-    name: name.value,
-    work: work.value,
-    volume: volume.value,
-    url: url.value,
-    fav: Number(fav.value) || 0,
-    ratingCount: Number(ratingCount.value) || 0,
-    siteRating: Number(siteRating.value) || 0,
-    authorRating: Number(authorRating.value) || 0,
+    main: Number(val("main")),
+    package: val("package"),
+    sub: val("sub"),
+    name: val("name"),
+    work: val("work"),
+    volume: val("volume"),
+    url: val("url"),
+    fav: Number(val("fav")) || 0,
+    ratingCount: Number(val("ratingCount")) || 0,
+    siteRating: Number(val("siteRating")) || 0,
+    authorRating: Number(val("authorRating")) || 0,
     date: new Date().toLocaleDateString()
   };
 
@@ -93,9 +85,14 @@ window.updateDate = async id => {
   await updateDoc(doc(db,"items",id),{date:new Date().toLocaleDateString()});
 };
 
-// ソート
+// 並び替え
 window.sortBy = key => {
-  currentSort = key;
+  if (currentSort === key) {
+    sortAsc = !sortAsc;
+  } else {
+    currentSort = key;
+    sortAsc = true;
+  }
   render();
 };
 
@@ -107,7 +104,7 @@ window.toggleDetails = () => {
   });
 };
 
-// 列ON/OFF
+// 列表示
 window.toggleColumn = index => {
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   hidden.includes(index)
@@ -123,24 +120,16 @@ function applyColumnVisibility(){
   document.querySelectorAll("table tr").forEach(row=>{
     Array.from(row.children).forEach((cell, i)=>{
 
-      // ✅ 操作列は固定表示（ここが今回のキモ）
       if (i >= 13) {
         cell.style.display = "";
         return;
       }
 
-      // 通常の表示/非表示
-      if (hidden.includes(i)) {
-        cell.style.display = "none";
-      } else {
-        cell.style.display = "";
-      }
-
+      cell.style.display = hidden.includes(i) ? "none" : "";
     });
   });
 }
 
-// チェック反映
 function applyCheckboxState(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   document.querySelectorAll("[data-col]").forEach(cb=>{
@@ -159,15 +148,21 @@ window.render = function(){
   );
 
   data.sort((a,b)=>{
+    let valA = a[currentSort] || "";
+    let valB = b[currentSort] || "";
+
     if(currentSort==="sub"){
       const f = s=>Number((s||"0").split("~")[0]);
-      return f(a.sub)-f(b.sub);
+      valA = f(valA);
+      valB = f(valB);
     }
-    return (a[currentSort]||0)>(b[currentSort]||0)?1:-1;
+
+    if (valA > valB) return sortAsc ? 1 : -1;
+    if (valA < valB) return sortAsc ? -1 : 1;
+    return 0;
   });
 
   resultCount.textContent = `${data.length}件`;
-
   list.innerHTML = "";
 
   data.forEach((d,i)=>{
