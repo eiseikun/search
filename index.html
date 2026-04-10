@@ -15,6 +15,7 @@
 <div class="search-box">
   <input id="search" placeholder="検索" oninput="render()">
   <button onclick="toggleDetails()">選択列表示</button>
+  <input type="file" id="fileInput">
 </div>
 
 <!-- 列表示 -->
@@ -33,8 +34,6 @@
 <label><input type="checkbox" data-col="11" checked>同人物</label>
 <label><input type="checkbox" data-col="12" checked>更新日</label>
 </div>
-
-<p id="resultCount"></p>
 
 <div class="add-btn">
   <button onclick="openModal()">＋ 追加</button>
@@ -67,17 +66,17 @@
 <thead>
 <tr>
   <th>No</th>
-  <th>大</th>
-  <th>パッケージ</th>
-  <th>小</th>
-  <th>名前</th>
-  <th>作品</th>
-  <th>ボリューム</th>
+  <th onclick="sortBy('main')">大</th>
+  <th onclick="sortBy('package')">パッケージ</th>
+  <th onclick="sortBy('sub')">小</th>
+  <th onclick="sortBy('name')">名前</th>
+  <th onclick="sortBy('work')">作品</th>
+  <th onclick="sortBy('volume')">ボリューム</th>
   <th>URL</th>
-  <th>⭐</th>
-  <th>評価数</th>
-  <th>サイト</th>
-  <th>同人物</th>
+  <th onclick="sortBy('fav')">⭐</th>
+  <th onclick="sortBy('ratingCount')">評価数</th>
+  <th onclick="sortBy('siteRating')">サイト</th>
+  <th onclick="sortBy('authorRating')">同人物</th>
   <th>更新日</th>
   <th>編集</th>
   <th>削除</th>
