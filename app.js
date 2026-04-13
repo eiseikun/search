@@ -1,42 +1,37 @@
-// ==============================
-// Firebase初期化
-// ==============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, addDoc, deleteDoc, doc,
   onSnapshot, updateDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app = initializeApp({
-  apiKey: "AIzaSyDJmfV7...",
+const firebaseConfig = {
+  apiKey: "AIzaSyDJmfV7Vow1e_VjOv06h-n27fWB5KK1l4o",
   authDomain: "search-management-date.firebaseapp.com",
   projectId: "search-management-date",
-});
+};
 
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
-// ==============================
-// 状態
-// ==============================
 let lastSnapshot = [];
 let editId = null;
 let currentSort = "no";
 let sortAsc = true;
 let useColumnFilter = false;
 
-// ==============================
-// Firestore
-// ==============================
+// =========================
+// 🔄 Firestore
+// =========================
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-// ==============================
-// 追加・編集
-// ==============================
+// =========================
+// ➕ 追加 / 編集
+// =========================
 window.addItem = async () => {
   const v = id => document.getElementById(id).value;
 
@@ -56,109 +51,125 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.name || !data.work) return alert("必須");
+  if (!data.name || !data.work) return alert("必須項目");
 
   if (editId) {
     const old = lastSnapshot.find(d => d.id === editId);
     data.no = old?.no ?? 1;
-    await updateDoc(doc(db,"items",editId),data);
+    await updateDoc(doc(db, "items", editId), data);
     editId = null;
   } else {
     data.no = maxNo + 1;
-    await addDoc(colRef,data);
+    await addDoc(colRef, data);
   }
 
+  document.querySelectorAll("#modal input").forEach(i => i.value = "");
   closeModal();
 };
 
-// ==============================
-// 削除
-// ==============================
+// =========================
+// 🗑️ 削除
+// =========================
 window.remove = async id => {
   if (!confirm("削除？")) return;
-  await deleteDoc(doc(db,"items",id));
+  await deleteDoc(doc(db, "items", id));
 };
 
-// ==============================
-// モーダル
-// ==============================
-window.openModal = () => document.getElementById("modal").style.display="block";
-window.closeModal = () => document.getElementById("modal").style.display="none";
-
-window.openColumnModal = () => {
-  document.getElementById("columnModal").style.display="block";
-};
-window.closeColumnModal = () => {
-  document.getElementById("columnModal").style.display="none";
+// =========================
+// ✏️ 編集
+// =========================
+window.startEdit = (id, ...vals) => {
+  openModal();
+  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
+  keys.forEach((k,i)=>document.getElementById(k).value = vals[i] || "");
+  editId = id;
 };
 
-// ★ここが修正ポイント（閉じれる保証）
-window.addEventListener("click", e => {
-  if (e.target.id === "columnModal") closeColumnModal();
-  if (e.target.id === "modal") closeModal();
-});
-
-// ==============================
-// 名前表示（クリック拡張）
-// ==============================
-window.toggleName = (el) => {
-  el.classList.toggle("expanded");
+// =========================
+// 📅 更新
+// =========================
+window.updateDate = async id => {
+  await updateDoc(doc(db,"items",id), {
+    date: new Date().toLocaleDateString()
+  });
 };
 
-// ==============================
-// 作品2行はCSSで対応済み
-// ==============================
+// =========================
+// 🔀 ソート
+// =========================
+window.sortBy = key => {
+  if (currentSort === key) sortAsc = !sortAsc;
+  else { currentSort = key; sortAsc = true; }
+  render();
+};
 
-// ==============================
-// 描画
-// ==============================
+// =========================
+// 🖥️ 描画
+// =========================
 window.render = function(){
   const keyword = document.getElementById("search").value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
-    Object.values(d).some(v =>
-      String(v).toLowerCase().includes(keyword)
-    )
+    Object.values(d).some(v => String(v).toLowerCase().includes(keyword))
   );
-
-  data.sort((a,b)=>{
-    let A = a[currentSort] || "";
-    let B = b[currentSort] || "";
-
-    return sortAsc
-      ? String(A).localeCompare(String(B), 'ja', { numeric:true })
-      : String(B).localeCompare(String(A), 'ja', { numeric:true });
-  });
 
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
-  let html = "";
+  document.getElementById("list").innerHTML = data.map(d =>
+  `<tr>
+    <td>${d.no ?? "-"}</td>
+    <td>${d.main}</td>
+    <td>${d.package||""}</td>
+    <td>${d.sub}</td>
+    <td>${d.name}</td>
+    <td>${d.work}</td>
+    <td>${d.place||"-"}</td>
+    <td>${d.url?`<a href="${d.url}" target="_blank">🔗</a>`:"-"}</td>
+    <td>${d.fav}</td>
+    <td>${d.ratingCount}</td>
+    <td>${d.siteRating}</td>
+    <td>${d.date}</td>
+    <td><button onclick="updateDate('${d.id}')">更新</button></td>
+    <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
+    <td><button onclick="remove('${d.id}')">削除</button></td>
+  </tr>`
+  ).join("");
+};
 
-  data.forEach(d=>{
-    html += `
-<tr>
-<td>${d.no ?? "-"}</td>
-<td>${d.main}</td>
-<td>${d.package||""}</td>
-<td>${d.sub}</td>
+// =========================
+// 🧩 モーダル制御（ここが重要）
+// =========================
+window.openModal = () => {
+  document.getElementById("modal").style.display = "block";
+};
 
-<td><div class="name-text" onclick="toggleName(this)">${d.name}</div></td>
+window.closeModal = () => {
+  document.getElementById("modal").style.display = "none";
+};
 
-<td><div class="work-text">${d.work}</div></td>
+window.openColumnModal = () => {
+  document.getElementById("columnModal").style.display = "block";
+};
 
-<td>${d.place||"-"}</td>
-<td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
+window.closeColumnModal = () => {
+  document.getElementById("columnModal").style.display = "none";
+};
 
-<td>${d.fav}</td>
-<td>${d.ratingCount}</td>
-<td>${d.siteRating}</td>
-<td>${d.date}</td>
+// 背景クリックでも閉じる
+window.onclick = e => {
+  if (e.target.id === "modal") closeModal();
+  if (e.target.id === "columnModal") closeColumnModal();
+};
 
-<td><button onclick="updateDate('${d.id}')">更新</button></td>
-<td><button onclick="startEdit('${d.id}', '${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
-<td><button onclick="remove('${d.id}')">削除</button></td>
-</tr>`;
-  });
+// =========================
+// その他
+// =========================
+window.toggleTools = () => {
+  const el = document.getElementById("tools");
+  el.style.display = el.style.display === "block" ? "none" : "block";
+};
 
-  document.getElementById("list").innerHTML = html;
+window.toggleDetails = () => {
+  useColumnFilter = !useColumnFilter;
+  render();
 };
