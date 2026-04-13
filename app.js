@@ -28,6 +28,22 @@ let useColumnFilter = false;
 
 const COLUMN_KEY = "column-settings";
 
+// 列定義（安定化のため論理管理）
+const COLS = {
+  1: "no",
+  2: "main",
+  3: "package",
+  4: "sub",
+  5: "name",
+  6: "work",
+  7: "place",
+  8: "url",
+  9: "fav",
+  10: "ratingCount",
+  11: "siteRating",
+  12: "date"
+};
+
 // =========================
 // 🔄 Firestore取得
 // =========================
@@ -166,25 +182,27 @@ window.render = function(){
 
   document.getElementById("list").innerHTML = data.map(d => `
 <tr>
-  <td>${d.no ?? "-"}</td>
-  <td>${d.main}</td>
-  <td>${d.package||""}</td>
-  <td>${d.sub}</td>
 
-  <td><div class="name-text" onclick="toggleName(this)">${d.name}</div></td>
-  <td><div class="work-text">${d.work}</div></td>
+  <td data-col="1">${d.no ?? "-"}</td>
+  <td data-col="2">${d.main}</td>
+  <td data-col="3">${d.package||""}</td>
+  <td data-col="4">${d.sub}</td>
 
-  <td>${d.place||"-"}</td>
-  <td>${d.url?`<a href="${d.url}" target="_blank">link</a>`:"-"}</td>
+  <td data-col="5"><div class="name-text" onclick="toggleName(this)">${d.name}</div></td>
+  <td data-col="6"><div class="work-text">${d.work}</div></td>
 
-  <td>${d.fav}</td>
-  <td>${d.ratingCount}</td>
-  <td>${d.siteRating}</td>
-  <td>${d.date}</td>
+  <td data-col="7">${d.place||"-"}</td>
+  <td data-col="8">${d.url?`<a href="${d.url}" target="_blank">link</a>`:"-"}</td>
 
-  <td><button onclick="updateDate('${d.id}')">更新</button></td>
-  <td><button onclick="startEdit('${d.id}', '${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
-  <td><button onclick="remove('${d.id}')">削除</button></td>
+  <td data-col="9">${d.fav}</td>
+  <td data-col="10">${d.ratingCount}</td>
+  <td data-col="11">${d.siteRating}</td>
+  <td data-col="12">${d.date}</td>
+
+  <td><button data-role="update" onclick="updateDate('${d.id}')">更新</button></td>
+  <td><button data-role="edit" onclick="startEdit('${d.id}', '${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
+  <td><button data-role="delete" onclick="remove('${d.id}')">削除</button></td>
+
 </tr>
 `).join("");
 
@@ -195,42 +213,57 @@ window.render = function(){
 };
 
 // =========================
-// 🧩 列表示トグル（修正版）
+// 📊 列表示トグル
 // =========================
 window.toggleColumnMode = () => {
   useColumnFilter = !useColumnFilter;
 
   const btn = document.getElementById("columnToggleBtn");
-  if (btn) {
-    btn.textContent = useColumnFilter ? "全表示" : "選択列のみ";
-  }
+  if (btn) btn.textContent = useColumnFilter ? "全表示" : "選択列のみ";
 
   render();
 };
 
 // =========================
-// 📊 列表示制御
+// 📊 列表示制御（完全安定版）
 // =========================
 function applyColumnVisibility(){
+
   const checks = document.querySelectorAll("#columnModal input[type='checkbox']");
 
-  checks.forEach(cb => {
-    const colIndex = Number(cb.dataset.col);
+  // 全部非表示（安全リセット）
+  document.querySelectorAll("[data-col],[data-role]")
+    .forEach(el => el.style.display = "");
 
-    document.querySelectorAll(`td:nth-child(${colIndex}), th:nth-child(${colIndex})`)
+  // 列制御
+  checks.forEach(cb => {
+    const col = cb.dataset.col;
+
+    document.querySelectorAll(`[data-col="${col}"]`)
       .forEach(el => {
         el.style.display = cb.checked ? "" : "none";
       });
   });
+
+  // 操作列は非表示
+  document.querySelectorAll("[data-role]")
+    .forEach(btn => {
+      btn.style.display = "none";
+    });
+
+  // No列は必ず表示
+  document.querySelectorAll('[data-col="1"]')
+    .forEach(el => el.style.display = "");
 }
 
 function showAllColumns(){
-  document.querySelectorAll("th, td")
+
+  document.querySelectorAll("[data-col],[data-role]")
     .forEach(el => el.style.display = "");
 }
 
 // =========================
-// 📂 管理ボタン（修正版）
+// 📂 管理ボタン（修正済み）
 // =========================
 window.toggleTools = () => {
   const el = document.getElementById("tools");
@@ -278,7 +311,7 @@ function loadColumnSettings(){
     });
 }
 
-// 即保存
+// 即時保存
 document.addEventListener("change", (e) => {
   if (e.target.matches("#columnModal input[type='checkbox']")) {
     saveColumnSettings();
