@@ -1,23 +1,20 @@
 /* ==============================
-   🧱 基本設定（全体）
+  🧱 全体
 ============================== */
 body {
   font-family: sans-serif;
   background: #eef1f5;
   padding: 10px;
-
-  /* 🔥 スマホ用に小さめ */
   font-size: 13px;
 }
 
 h1 {
   text-align: center;
-  font-size: 18px;
 }
 
 
 /* ==============================
-   🔍 検索バー
+  🔍 検索バー
 ============================== */
 .search-bar {
   display: flex;
@@ -29,84 +26,84 @@ h1 {
 
 .search-bar input {
   flex: 1;
-  padding: 6px;
 }
 
 
 /* ==============================
-   📊 テーブル全体
+  📂 CSVエリア
+============================== */
+#csvArea {
+  display: none;
+  margin-top: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.danger {
+  background: red;
+  color: white;
+}
+
+
+/* ==============================
+  📊 テーブル
 ============================== */
 .table-wrap {
-  overflow-x: auto; /* 横スクロール */
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-　table-layout: fixed;
+  table-layout: fixed;
 }
 
 th, td {
   padding: 6px;
-  text-align: center;
   border-bottom: 1px solid #ddd;
+  text-align: center;
 }
 
-
-/* ==============================
-   📏 行表示制御（重要）
-============================== */
-
-/* 🔥 基本：1行に収める */
+/* 1行制限 */
 td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 🔥 作品だけ2行OK */
+/* 作品は2行 */
 .work-text {
   display: -webkit-box;
-  -webkit-line-clamp: 2;       /* ← 行数制限 */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 名前 */
+.name-text {
+  cursor: pointer;
+}
+.name-text.expanded {
   white-space: normal;
 }
 
 
 /* ==============================
-   📐 列幅調整（ここで見やすさ決まる）
+  📐 列幅
 ============================== */
-
-/* No */
-td:nth-child(1){
-  width: 40px;
-}
-
-/* 名前 */
-td:nth-child(5),
-th:nth-child(5){
-  width: 100px;
-  max-width: 100px;
-}
-
-/* 作品 */
-td:nth-child(6){
-  width: 160px;
-}
+td:nth-child(1){ width:40px; }
+td:nth-child(5){ width:100px; }
+td:nth-child(6){ width:160px; }
 
 
 /* ==============================
-   🔗 URL表示（アイコン化）
+  🔗 URL
 ============================== */
-
-/* 元の文字を消す */
 td:nth-child(8) a {
   font-size: 0;
 }
-
-/* アイコン表示 */
 td:nth-child(8) a::after {
   content: "🔗";
   font-size: 14px;
@@ -114,68 +111,35 @@ td:nth-child(8) a::after {
 
 
 /* ==============================
-   ⭐ お気に入り強調
+  ⭐ 強調
 ============================== */
 td:nth-child(9){
-  color: #f39c12;
-  font-weight: bold;
+  color:#f39c12;
+  font-weight:bold;
 }
 
 
 /* ==============================
-   🪟 モーダル（ポップアップ）
+  🪟 モーダル
 ============================== */
 .modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-
-  width: 100%;
-  height: 100%;
-
-  background: rgba(0,0,0,0.5);
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
 }
 
-/* 中身 */
 .modal-content {
-  background: white;
-  margin: 10% auto;
-  padding: 20px;
-
-  width: 90%;
-  max-width: 500px;
-
-  border-radius: 10px;
+  background:white;
+  margin:10% auto;
+  padding:20px;
+  width:90%;
+  max-width:500px;
 }
 
-
-/* ==============================
-   ⚙️ 列設定グリッド
-============================== */
 .column-grid {
-  display: grid;
-
-  /* 🔥 スマホでも見やすい3列 */
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 12px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
 }
-/* ==============================
-   👤 名前：通常（1行省略）
-============================== */
-.name-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
-
-/* ==============================
-   👤 展開時
-============================== */
-.name-text.expanded {
-  white-space: normal;     /* 改行OK */
-  overflow: visible;
-}
-
