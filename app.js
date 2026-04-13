@@ -153,32 +153,65 @@ window.render = function(){
       String(v).toLowerCase().includes(keyword)
     )
   );
+// ==============================
+// 👤 名前ごとの件数カウント
+// ==============================
+const nameCount = {};
 
+data.forEach(d => {
+  const n = d.name || "";
+  nameCount[n] = (nameCount[n] || 0) + 1;
+});
   // 🔥 ソート処理
   data.sort((a,b)=>{
+    // ==============================
+  // 👤 名前ソート（件数順）
+  // ==============================
+  if (currentSort === "name") {
 
-    // sub（範囲ソート）
-    if (currentSort === "sub") {
-      const A = parseRange(a.sub);
-      const B = parseRange(b.sub);
+    const countA = nameCount[a.name] || 0;
+    const countB = nameCount[b.name] || 0;
 
-      if (A.start !== B.start) {
-        return sortAsc ? A.start - B.start : B.start - A.start;
-      }
-      return sortAsc ? A.end - B.end : B.end - A.end;
+    // 件数で比較
+    if (countA !== countB) {
+      return sortAsc ? countA - countB : countB - countA;
     }
 
-    let A = a[currentSort];
-    let B = b[currentSort];
-
-    if (!isNaN(A) && !isNaN(B)) {
-      return sortAsc ? A - B : B - A;
-    }
-
+    // 同じ件数なら名前で自然順
     return sortAsc
-      ? String(A).localeCompare(String(B))
-      : String(B).localeCompare(String(A));
-  });
+      ? String(a.name).localeCompare(String(b.name), 'ja', { numeric: true })
+      : String(b.name).localeCompare(String(a.name), 'ja', { numeric: true });
+  }
+
+  // ==============================
+  // 小（範囲ソート）
+  // ==============================
+  if (currentSort === "sub") {
+    const A = parseRange(a.sub);
+    const B = parseRange(b.sub);
+
+    if (A.start !== B.start) {
+      return sortAsc ? A.start - B.start : B.start - A.start;
+    }
+
+    return sortAsc ? A.end - B.end : B.end - A.end;
+  }
+
+  // ==============================
+  // 通常ソート
+  // ==============================
+  let A = a[currentSort];
+  let B = b[currentSort];
+
+  if (!isNaN(A) && !isNaN(B)) {
+    return sortAsc ? A - B : B - A;
+  }
+
+  return sortAsc
+    ? String(A).localeCompare(String(B), 'ja', { numeric: true })
+    : String(B).localeCompare(String(A), 'ja', { numeric: true });
+});
+   
 
   resultCount.textContent = `${data.length}件`;
 
