@@ -12,31 +12,33 @@
 
 <h1>📚 作品管理</h1>
 
-<!-- ================= 検索バー ================= -->
 <div class="search-bar">
   <input id="search" placeholder="🔍 検索..." oninput="render()">
-
-  <button onclick="toggleDetails()">列表示</button>
-  <button onclick="openColumnModal()">⚙️列設定</button>
+  <button onclick="toggleDetails()">選択列のみ</button>
+  <button onclick="openColumnModal()">⚙️</button>
   <button onclick="openModal()">＋追加</button>
 </div>
 
-<!-- ================= 管理 ================= -->
-<div style="margin:8px 0;">
-  <input type="file" id="csvFile">
-  <button onclick="importCSV()">CSV取込</button>
-  <button onclick="resetAll()" style="background:red;color:white;">全削除</button>
+<!-- 管理ボタン（普段非表示） -->
+<div class="admin-bar" id="adminBar" style="display:none;">
+  <input type="file" id="csvFile" hidden>
+  <button id="csvBtn">CSV取込</button>
+  <button onclick="resetAll()" style="background:red;">全削除</button>
 </div>
+
+<!-- 管理表示切替ボタン追加 -->
+<button onclick="toggleAdminBar()">管理モード</button>
+  
 
 <div class="result-bar">
   <span id="resultCount"></span>
 </div>
 
-<!-- ================= 列設定 ================= -->
-<div id="columnModal" class="modal" onclick="closeColumnModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-
-    <h3>列設定</h3>
+<!-- 列設定 -->
+<div id="columnModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeColumnModal()">&times;</span>
+    <h3>列表示設定</h3>
 
     <div class="column-grid">
       <label><input type="checkbox" data-col="1">大</label>
@@ -52,23 +54,24 @@
       <label><input type="checkbox" data-col="11">更新日</label>
     </div>
 
-    <button onclick="closeColumnModal()">閉じる</button>
   </div>
 </div>
 
-<!-- ================= 追加 ================= -->
-<div id="modal" class="modal" onclick="closeModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
+<!-- モーダル -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
 
     <input id="main" placeholder="大分類">
-    <input id="package" placeholder="パッケージ">
+    <input id="package" placeholder="パッケージ名">
     <input id="sub" placeholder="小分類">
 
     <input id="name" placeholder="名前">
-    <input id="work" placeholder="作品">
+    <input id="work" placeholder="作品名">
     <input id="place" placeholder="部分">
 
     <input id="url" placeholder="URL">
+
     <input id="fav" placeholder="⭐">
     <input id="ratingCount" placeholder="評価数">
     <input id="siteRating" placeholder="サイト評価">
@@ -77,33 +80,42 @@
   </div>
 </div>
 
-<!-- ================= テーブル ================= -->
 <div class="table-wrap">
 <table>
 <thead>
 <tr>
-<th onclick="sortBy('no')">No</th>
-<th onclick="sortBy('main')">大</th>
-<th onclick="sortBy('package')">パッケージ</th>
-<th onclick="sortBy('sub')">小</th>
-<th onclick="sortBy('name')">名前</th>
-<th onclick="sortBy('work')">作品</th>
-<th onclick="sortBy('place')">部分</th>
-<th onclick="sortBy('url')">URL</th>
-<th onclick="sortBy('fav')">⭐</th>
-<th onclick="sortBy('ratingCount')">評価数</th>
-<th onclick="sortBy('siteRating')">サイト</th>
-<th onclick="sortBy('date')">更新日</th>
+  <th onclick="sortBy('no')">No</th>
+  <th onclick="sortBy('main')">大</th>
+  <th onclick="sortBy('package')">パッケージ</th>
+  <th onclick="sortBy('sub')">小</th>
 
-<th>更新</th>
-<th>編集</th>
-<th>削除</th>
+  <th onclick="sortBy('name')">名前</th>
+  <th onclick="sortBy('work')">作品</th>
+
+  <th onclick="sortBy('place')">部分</th>
+  <th onclick="sortBy('url')">URL</th>
+
+  <th onclick="sortBy('fav')">⭐</th>
+  <th onclick="sortBy('ratingCount')">評価数</th>
+  <th onclick="sortBy('siteRating')">サイト</th>
+
+  <th onclick="sortBy('date')">更新日</th>
+
+  <th>更新</th>
+  <th>編集</th>
+  <th>削除</th>
 </tr>
 </thead>
 
 <tbody id="list"></tbody>
 </table>
 </div>
-
+<!-- 名前表示モーダル -->
+<div id="nameModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeNameModal()">&times;</span>
+    <div id="nameModalText" style="word-break: break-word;"></div>
+  </div>
+</div>
 </body>
 </html>
