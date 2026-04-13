@@ -1,6 +1,10 @@
+// ==============================
+// 🔥 Firebase 初期化
+// ==============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc,getDocs
+  getFirestore, collection, addDoc, deleteDoc, doc,
+  onSnapshot, updateDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -13,22 +17,32 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
-/* 状態 */
+
+// ==============================
+// 📦 状態管理
+// ==============================
 let lastSnapshot = [];
 let editId = null;
+
 let currentSort = "no";
 let sortAsc = true;
 
-/* Firestore */
+let useColumnFilter = false; // ← 列表示切替（これだけ使う）
+
+
+// ==============================
+// 🔄 Firestore リアルタイム取得
+// ==============================
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-/* ==============================
-   追加 / 編集
-============================== */
+
+// ==============================
+// ➕ 追加 / ✏️ 編集
+// ==============================
 window.addItem = async () => {
   const val = id => document.getElementById(id).value;
 
@@ -64,44 +78,61 @@ window.addItem = async () => {
   }
 
   document.querySelectorAll("#modal input").forEach(i => i.value = "");
-  modal.style.display = "none";
+  closeModal();
 };
 
-/* 削除 */
+
+// ==============================
+// 🗑️ 削除
+// ==============================
 window.remove = async id => {
   if (!confirm("削除しますか？")) return;
   await deleteDoc(doc(db, "items", id));
 };
 
-/* 編集 */
+
+// ==============================
+// ✏️ 編集開始
+// ==============================
 window.startEdit = (id, ...vals) => {
-  modal.style.display = "block";
+  openModal();
   const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
   keys.forEach((k,i)=> document.getElementById(k).value = vals[i]||"");
   editId = id;
 };
 
-/* 更新日 */
+
+// ==============================
+// 📅 更新日更新
+// ==============================
 window.updateDate = async id => {
-  await updateDoc(doc(db,"items",id),{date:new Date().toLocaleDateString()});
+  await updateDoc(doc(db,"items",id),{
+    date:new Date().toLocaleDateString()
+  });
 };
 
-/* ==============================
-   ソート
-============================== */
+
+// ==============================
+// 🔀 ソート切替
+// ==============================
 window.sortBy = key => {
   if (currentSort === key) sortAsc = !sortAsc;
-  else { currentSort = key; sortAsc = true; }
+  else {
+    currentSort = key;
+    sortAsc = true;
+  }
   render();
 };
 
-/* ==============================
-   範囲パース（完全版）
-============================== */
+
+// ==============================
+// 🔢 範囲パース（sub用）
+// ==============================
 function parseRange(val) {
   if (!val) return { start: 0, end: 0 };
-  // 🔥 空白除去（これ超重要）
+
   val = String(val).trim();
+
   const parts = val.split("-");
   const start = Number(parts[0].trim()) || 0;
   const end = parts[1] ? Number(parts[1].trim()) : start;
@@ -109,9 +140,10 @@ function parseRange(val) {
   return { start, end };
 }
 
-/* ==============================
-   描画
-============================== */
+
+// ==============================
+// 🖥️ 描画
+// ==============================
 window.render = function(){
 
   const keyword = document.getElementById("search").value.toLowerCase();
@@ -121,40 +153,38 @@ window.render = function(){
       String(v).toLowerCase().includes(keyword)
     )
   );
+
+  // 🔥 ソート処理
   data.sort((a,b)=>{
 
-  if (currentSort === "sub") {
+    // sub（範囲ソート）
+    if (currentSort === "sub") {
+      const A = parseRange(a.sub);
+      const B = parseRange(b.sub);
 
-    const A = parseRange(a.sub);
-    const B = parseRange(b.sub);
-
-    // 開始値
-    if (A.start !== B.start) {
-      return sortAsc ? A.start - B.start : B.start - A.start;
+      if (A.start !== B.start) {
+        return sortAsc ? A.start - B.start : B.start - A.start;
+      }
+      return sortAsc ? A.end - B.end : B.end - A.end;
     }
 
-    // 終了値
-    return sortAsc ? A.end - B.end : B.end - A.end;
-  }
+    let A = a[currentSort];
+    let B = b[currentSort];
 
-  let A = a[currentSort];
-  let B = b[currentSort];
+    if (!isNaN(A) && !isNaN(B)) {
+      return sortAsc ? A - B : B - A;
+    }
 
-  if (!isNaN(A) && !isNaN(B)) {
-    return sortAsc ? A - B : B - A;
-  }
-
-  return sortAsc
-    ? String(A).localeCompare(String(B))
-    : String(B).localeCompare(String(A));
-});
- 
+    return sortAsc
+      ? String(A).localeCompare(String(B))
+      : String(B).localeCompare(String(A));
+  });
 
   resultCount.textContent = `${data.length}件`;
 
   let html = "";
 
-  data.forEach((d)=>{
+  data.forEach(d=>{
     html += `
 <tr>
 <td>${d.no ?? "-"}</td>
@@ -177,11 +207,16 @@ window.render = function(){
   });
 
   document.getElementById("list").innerHTML = html;
+
+  // 🔥 列表示制御
+  if (useColumnFilter) applyColumnVisibility();
+  else showAllColumns();
 };
 
-/* ==============================
-   CSV取込
-============================== */
+
+// ==============================
+// 📂 CSV取込
+// ==============================
 async function importCSV() {
   const file = document.getElementById("csvFile").files[0];
   if (!file) return alert("ファイル選択して");
@@ -199,7 +234,6 @@ async function importCSV() {
   let count = 0;
 
   for (let i = 1; i < lines.length; i++){
-
     const values = parseCSVLine(lines[i]);
 
     const obj = {};
@@ -209,7 +243,6 @@ async function importCSV() {
 
     const data = {
       no: Number(obj.no) || ++maxNo,
-
       main: Number(obj.main),
       package: obj.package,
       sub: obj.sub,
@@ -234,7 +267,10 @@ async function importCSV() {
   alert(`CSV取り込み完了：${count}件`);
 }
 
-/* CSV解析 */
+
+// ==============================
+// CSV解析
+// ==============================
 function parseCSVLine(line) {
   const result = [];
   let current = "";
@@ -257,26 +293,32 @@ function parseCSVLine(line) {
   return result;
 }
 
-/* ==============================
-   ボタン接続（重要）
-============================== */
-document.getElementById("csvBtn").addEventListener("click", importCSV);
 
-/* module対策 */
+// ==============================
+// 🔘 ボタン接続
+// ==============================
+document.getElementById("csvBtn").addEventListener("click", importCSV);
 window.importCSV = importCSV;
 
+
+// ==============================
+// 🧹 全削除
+// ==============================
 window.resetAll = async () => {
   if (!confirm("全部削除します。本当にOK？")) return;
 
   const snapshot = await getDocs(colRef);
-
   for (const d of snapshot.docs) {
     await deleteDoc(doc(db, "items", d.id));
   }
 
   alert("全削除完了");
 };
-/* モーダル */
+
+
+// ==============================
+// 🪟 モーダル
+// ==============================
 window.openModal = () => {
   document.getElementById("modal").style.display = "block";
 };
@@ -293,14 +335,20 @@ window.openColumnModal = () => {
 window.closeColumnModal = () => {
   document.getElementById("columnModal").style.display = "none";
 };
-let showDetails = true;
-let useColumnFilter = false;
 
+
+// ==============================
+// 👁️ 列表示切替
+// ==============================
 window.toggleDetails = () => {
   useColumnFilter = !useColumnFilter;
-  showDetails = !showDetails;
   render();
 };
+
+
+// ==============================
+// 📊 列表示制御
+// ==============================
 function applyColumnVisibility(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 
@@ -308,8 +356,9 @@ function applyColumnVisibility(){
     const cells = row.children;
 
     for (let i = 0; i < cells.length; i++){
-      if (i === 0) continue;
-      if (i >= cells.length - 3) continue;
+
+      if (i === 0) continue; // No固定
+      if (i >= cells.length - 3) continue; // 操作ボタン
 
       cells[i].style.display = hidden.includes(i) ? "none" : "";
     }
@@ -330,3 +379,23 @@ function applyCheckboxState(){
     cb.checked = !hidden.includes(Number(cb.dataset.col));
   });
 }
+
+
+// ==============================
+// 💾 チェック保存
+// ==============================
+document.addEventListener("change", e=>{
+  if(!e.target.dataset.col) return;
+
+  const index = Number(e.target.dataset.col);
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+
+  if (e.target.checked) {
+    const i = hidden.indexOf(index);
+    if (i !== -1) hidden.splice(i,1);
+  } else {
+    if (!hidden.includes(index)) hidden.push(index);
+  }
+
+  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
+});
