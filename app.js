@@ -43,7 +43,7 @@ window.addItem = async () => {
     sub: val("sub"),
     name: val("name"),
     work: val("work"),
-    volume: val("volume"),
+    place: val("place"),
     url: val("url"),
     fav: Number(val("fav")) || 0,
     ratingCount: Number(val("ratingCount")) || 0,
@@ -81,7 +81,7 @@ window.remove = async id => {
 /* 編集 */
 window.startEdit = (id, ...vals) => {
   modal.style.display = "block";
-  const keys = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating"];
+  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
   keys.forEach((k,i)=> document.getElementById(k).value = vals[i]||"");
   editId = id;
 };
@@ -130,7 +130,7 @@ window.render = function(){
 <td>${d.sub}</td>
 <td>${d.name}</td>
 <td><div class="work-text">${d.work}</div></td>
-<td>${d.volume||"-"}</td>
+<td>${d.place||"-"}</td>
 <td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
 <td>${d.fav}</td>
 <td>${d.ratingCount}</td>
@@ -138,7 +138,7 @@ window.render = function(){
 <td class="detail">${d.date}</td>
 
 <td><button onclick="updateDate('${d.id}')">更新</button></td>
-<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
+<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
   });
