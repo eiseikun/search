@@ -19,15 +19,16 @@
   <button onclick="openModal()">＋追加</button>
 </div>
 
-
-<!-- ======================
-📂 管理ボタン（通常は隠す想定）
-====================== -->
-<div class="admin-bar">
+<!-- 管理ボタン（普段非表示） -->
+<div class="admin-bar" id="adminBar" style="display:none;">
   <input type="file" id="csvFile" hidden>
   <button id="csvBtn">CSV取込</button>
   <button onclick="resetAll()" style="background:red;">全削除</button>
 </div>
+
+<!-- 管理表示切替ボタン追加 -->
+<button onclick="toggleAdminBar()">管理モード</button>
+  
 
 <div class="result-bar">
   <span id="resultCount"></span>
