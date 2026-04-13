@@ -181,7 +181,7 @@ window.render = function(){
 <td>${d.package||""}</td>
 <td>${d.sub}</td>
 <td>${d.name}</td>
-<td>${d.work}</td>
+<td><div class="work-text">${d.work}</div></td>
 <td>${d.volume||"-"}</td>
 <td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
 
