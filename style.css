@@ -1,60 +1,147 @@
 body {
   font-family: sans-serif;
   background: #eef1f5;
-  font-size: 13px;
   padding: 10px;
+  font-size: 13px;
 }
 
+h1 {
+  text-align: center;
+  font-size: 18px;
+}
+
+/* ======================
+ツールバー
+====================== */
 .search-bar {
-  display:flex;
-  gap:6px;
-  background:white;
-  padding:8px;
-  border-radius:10px;
+  display: flex;
+  gap: 6px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
 }
 
+/* ======================
+テーブル
+====================== */
 .table-wrap {
-  overflow-x:auto;
+  overflow-x: auto;
 }
 
 table {
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  table-layout:fixed;
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  table-layout: fixed; /* 重要 */
 }
 
-th,td {
-  padding:6px;
-  text-align:center;
-  border-bottom:1px solid #ddd;
+th, td {
+  padding: 6px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
 }
 
+/* ======================
+文字省略
+====================== */
 td {
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* ======================
+⭐ 作品（2行表示復活）
+====================== */
+.work-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+
+/* ======================
+名前（1行省略）
+====================== */
+.name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* ======================
+名前展開
+====================== */
+.name-text.expanded {
+  white-space: normal;
+}
+
+/* ======================
+列幅
+====================== */
+td:nth-child(1){ width: 40px; }
+td:nth-child(5){ width: 100px; }
+td:nth-child(6){ width: 160px; }
+
+/* ======================
+URLアイコン化
+====================== */
+td:nth-child(8) a {
+  font-size: 0;
+}
+td:nth-child(8) a::after {
+  content: "🔗";
+  font-size: 14px;
+}
+
+/* ======================
+モーダル
+====================== */
 .modal {
-  display:none;
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
 }
 
 .modal-content {
-  background:white;
-  margin:10% auto;
-  padding:20px;
-  width:90%;
-  max-width:500px;
-  border-radius:10px;
+  background: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
 }
 
+/* ======================
+列設定
+====================== */
 .column-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ======================
+閉じるボタン強化
+====================== */
+.close {
+  float: right;
+  cursor: pointer;
+  font-size: 20px;
+}
+/* ======================
+管理バー
+====================== */
+.admin-bar {
+  display: none; /* 初期非表示 */
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* 表示時 */
+.admin-bar.show {
+  display: flex;
 }
