@@ -9,14 +9,15 @@ const firebaseConfig = {
   projectId: "search-management-date",
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
 let lastSnapshot = [];
 let editId = null;
-let currentSort = "name";
+let showDetails = true;
+let useColumnFilter = false;
+let currentSort = "main";
 let sortAsc = true;
 
 /* モーダル */
@@ -29,7 +30,7 @@ window.openColumnModal = () => {
 };
 window.closeColumnModal = () => columnModal.style.display = "none";
 
-/* Firestore */
+/* データ取得 */
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
@@ -55,7 +56,7 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.name || !data.work) return alert("必須項目入力");
+  if (!data.main || !data.sub || !data.name || !data.work) return alert("必須項目入力");
 
   if (editId) {
     await updateDoc(doc(db, "items", editId), data);
@@ -75,12 +76,16 @@ window.remove = async id => {
 };
 
 /* 編集 */
-window.startEdit = (id, d) => {
+window.startEdit = (id, ...vals) => {
   openModal();
-  Object.keys(d).forEach(k=>{
-    if(document.getElementById(k)) document.getElementById(k).value = d[k] || "";
-  });
+  const keys = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating","authorRating"];
+  keys.forEach((k,i)=> document.getElementById(k).value = vals[i]||"");
   editId = id;
+};
+
+/* 更新日 */
+window.updateDate = async id => {
+  await updateDoc(doc(db,"items",id),{date:new Date().toLocaleDateString()});
 };
 
 /* ソート */
@@ -90,32 +95,60 @@ window.sortBy = key => {
   render();
 };
 
-/* 行展開 */
-window.toggleRow = (el) => {
-  const row = el.closest("tr").nextElementSibling;
-  row.style.display = row.style.display === "table-row" ? "none" : "table-row";
+/* 切替 */
+window.toggleDetails = () => {
+  useColumnFilter = !useColumnFilter;
+  showDetails = !showDetails;
+  render();
 };
 
-/* 列設定 */
+/* チェック保存 */
 document.addEventListener("change", e=>{
   if(!e.target.dataset.col) return;
+
+  const index = Number(e.target.dataset.col);
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
 
-  if(e.target.checked){
-    const i = hidden.indexOf(e.target.dataset.col);
-    if(i !== -1) hidden.splice(i,1);
-  }else{
-    hidden.push(e.target.dataset.col);
+  if (e.target.checked) {
+    const i = hidden.indexOf(index);
+    if (i !== -1) hidden.splice(i,1);
+  } else {
+    if (!hidden.includes(index)) hidden.push(index);
   }
 
   localStorage.setItem("hiddenCols", JSON.stringify(hidden));
-  render();
 });
+
+/* 列制御 */
+function applyColumnVisibility(){
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+
+  const rows = document.querySelectorAll("table tr"); // ← ここ重要
+
+  rows.forEach(row=>{
+    const cells = row.children;
+
+    for (let i = 0; i < cells.length; i++){
+      if (i === 0) continue; // No列は常に表示
+      if (i >= cells.length - 3) continue; // 更新・編集・削除は表示
+
+      cells[i].style.display = hidden.includes(i) ? "none" : "";
+    }
+  });
+}
+
+function showAllColumns(){
+  document.querySelectorAll("table tr").forEach(row=>{
+    Array.from(row.children).forEach(cell=>{
+      cell.style.display = "";
+    });
+  });
+}
 
 function applyCheckboxState(){
   const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
   document.querySelectorAll("[data-col]").forEach(cb=>{
-    cb.checked = !hidden.includes(cb.dataset.col);
+    cb.checked = !hidden.includes(Number(cb.dataset.col));
   });
 }
 
@@ -125,54 +158,51 @@ window.render = function(){
   const keyword = search.value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
-    Object.values(d).some(v =>
-      String(v).toLowerCase().includes(keyword)
-    )
+    d.name?.toLowerCase().includes(keyword) ||
+    d.work?.toLowerCase().includes(keyword)
   );
 
   data.sort((a,b)=>{
-    let A = a[currentSort];
-    let B = b[currentSort];
-
-    if (!isNaN(A) && !isNaN(B)) return sortAsc ? A-B : B-A;
-    return sortAsc ? String(A).localeCompare(String(B)) : String(B).localeCompare(String(A));
+    let A = a[currentSort] || "";
+    let B = b[currentSort] || "";
+    if (A > B) return sortAsc ? 1 : -1;
+    if (A < B) return sortAsc ? -1 : 1;
+    return 0;
   });
 
   resultCount.textContent = `${data.length}件`;
 
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
-
   let html = "";
-
   data.forEach((d,i)=>{
     html += `
 <tr>
 <td>${i+1}</td>
+<td>${d.main}</td>
+<td>${d.package||""}</td>
+<td>${d.sub}</td>
 <td>${d.name}</td>
 <td>${d.work}</td>
-<td>${d.fav}</td>
-<td><button onclick="toggleRow(this)">▶</button></td>
-<td><button onclick='startEdit("${d.id}", ${JSON.stringify(d)})'>編集</button></td>
-<td><button onclick="remove('${d.id}')">削除</button></td>
-</tr>
+<td>${d.volume||"-"}</td>
+<td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
 
-<tr class="detail-row">
-<td colspan="7">
-  <div class="detail-box">
-    ${!hidden.includes("main") ? `大: ${d.main}<br>`:""}
-    ${!hidden.includes("sub") ? `小: ${d.sub}<br>`:""}
-    ${!hidden.includes("package") ? `パッケージ: ${d.package || "-"}<br>`:""}
-    ${!hidden.includes("volume") ? `ボリューム: ${d.volume || "-"}<br>`:""}
-    ${!hidden.includes("url") ? `URL: ${d.url ? `<a href="${d.url}" target="_blank">リンク</a>`:"-"}<br>`:""}
-    ${!hidden.includes("ratingCount") ? `評価数: ${d.ratingCount}<br>`:""}
-    ${!hidden.includes("siteRating") ? `サイト: ${d.siteRating}<br>`:""}
-    ${!hidden.includes("authorRating") ? `同人物: ${d.authorRating}<br>`:""}
-    ${!hidden.includes("date") ? `更新日: ${d.date}<br>`:""}
-  </div>
-</td>
-</tr>
-`;
+<td class="detail">${d.fav}</td>
+<td class="detail">${d.ratingCount}</td>
+<td class="detail">${d.siteRating}</td>
+<td class="detail">${d.authorRating}</td>
+<td class="detail">${d.date}</td>
+
+<td><button onclick="updateDate('${d.id}')">更新</button></td>
+<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.authorRating}')">編集</button></td>
+<td><button onclick="remove('${d.id}')">削除</button></td>
+</tr>`;
   });
 
   list.innerHTML = html;
+
+  if (useColumnFilter) applyColumnVisibility();
+  else showAllColumns();
+
+  document.querySelectorAll(".detail").forEach(el=>{
+    el.style.display = showDetails ? "" : "none";
+  });
 };
