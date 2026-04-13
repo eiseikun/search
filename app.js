@@ -452,3 +452,15 @@ window.toggleName = (el) => {
 window.closeNameModal = () => {
   document.getElementById("nameModal").style.display = "none";
 };
+// ==============================
+// 🔐 管理バー表示切替
+// ==============================
+window.toggleAdminBar = () => {
+  const bar = document.getElementById("adminBar");
+
+  if (bar.classList.contains("show")) {
+    bar.classList.remove("show");
+  } else {
+    bar.classList.add("show");
+  }
+};
