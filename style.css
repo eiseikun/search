@@ -110,21 +110,20 @@ tr:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-/* ===== 基本：全部1行で省略 ===== */
+/* ===== 基本：全部1行 ===== */
 td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ===== 作品列だけ2行表示 ===== */
-/* 作品は6列目（No=1として） */
+/* ===== 作品だけ2行 ===== */
 td:nth-child(6) {
-  white-space: normal;           /* 折り返し許可 */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;         /* 2行まで */
-  -webkit-box-orient: vertical;
+  white-space: normal;      /* 折り返しOK */
   overflow: hidden;
   line-height: 1.2;
-  max-height: 2.4em;             /* 2行分 */
+  max-height: 2.4em;        /* 2行分 */
+
+  /* ↓これ重要（table崩さない） */
+  word-break: break-word;
 }
