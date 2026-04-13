@@ -158,17 +158,24 @@ window.render = function(){
   const keyword = search.value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
-    d.name?.toLowerCase().includes(keyword) ||
-    d.work?.toLowerCase().includes(keyword)
-  );
+  Object.values(d).some(v =>
+    String(v).toLowerCase().includes(keyword)
+  )
+);
 
   data.sort((a,b)=>{
-    let A = a[currentSort] || "";
-    let B = b[currentSort] || "";
-    if (A > B) return sortAsc ? 1 : -1;
-    if (A < B) return sortAsc ? -1 : 1;
-    return 0;
-  });
+  let A = a[currentSort];
+  let B = b[currentSort];
+
+  if (!isNaN(A) && !isNaN(B)){
+    return sortAsc ? A - B : B - A;
+  }
+
+  A = String(A || "");
+  B = String(B || "");
+
+  return sortAsc ? A.localeCompare(B) : B.localeCompare(A);
+});
 
   resultCount.textContent = `${data.length}件`;
 
@@ -198,7 +205,7 @@ window.render = function(){
   });
 
   list.innerHTML = html;
-
+  applyColumnVisibility();
   if (useColumnFilter) applyColumnVisibility();
   else showAllColumns();
 
