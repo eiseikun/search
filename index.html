@@ -12,7 +12,6 @@
 
 <h1>📚 作品管理</h1>
 
-<!-- 検索バー -->
 <div class="search-bar">
   <input id="search" placeholder="🔍 検索..." oninput="render()">
   <button onclick="toggleDetails()">選択列のみ</button>
@@ -20,12 +19,11 @@
   <button onclick="openModal()">＋追加</button>
 </div>
 
-<!-- 件数 -->
 <div class="result-bar">
   <span id="resultCount"></span>
 </div>
 
-<!-- 列設定モーダル -->
+<!-- 列設定 -->
 <div id="columnModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeColumnModal()">&times;</span>
@@ -34,24 +32,19 @@
       <label><input type="checkbox" data-col="1">大</label>
       <label><input type="checkbox" data-col="2">パッケージ</label>
       <label><input type="checkbox" data-col="3">小</label>
-      <label><input type="checkbox" data-col="4">名前</label>
-      <label><input type="checkbox" data-col="5">作品</label>
       <label><input type="checkbox" data-col="6">ボリューム</label>
       <label><input type="checkbox" data-col="7">URL</label>
-      <label><input type="checkbox" data-col="8">⭐</label>
       <label><input type="checkbox" data-col="9">評価数</label>
       <label><input type="checkbox" data-col="10">サイト</label>
-      <label><input type="checkbox" data-col="11">同人物</label>
-      <label><input type="checkbox" data-col="12">更新日</label>
+      <label><input type="checkbox" data-col="11">更新日</label>
     </div>
   </div>
 </div>
 
-<!-- 追加モーダル -->
+<!-- モーダル -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
-    <h2>作品登録 / 編集</h2>
 
     <input id="main" placeholder="大分類">
     <input id="package" placeholder="パッケージ名">
@@ -66,7 +59,6 @@
     <input id="fav" placeholder="⭐">
     <input id="ratingCount" placeholder="評価数">
     <input id="siteRating" placeholder="サイト評価">
-    <input id="authorRating" placeholder="同人物評価">
 
     <button onclick="addItem()">保存</button>
   </div>
@@ -77,18 +69,20 @@
 <thead>
 <tr>
   <th>No</th>
-  <th onclick="sortBy('main')">大</th>
-  <th onclick="sortBy('package')">パッケージ</th>
-  <th onclick="sortBy('sub')">小</th>
+  <th>大</th>
+  <th>パッケージ</th>
+  <th>小</th>
+
   <th onclick="sortBy('name')">名前</th>
   <th onclick="sortBy('work')">作品</th>
+
   <th>ボリューム</th>
   <th>URL</th>
 
-  <th class="detail" onclick="sortBy('fav')">⭐</th>
-  <th class="detail" onclick="sortBy('ratingCount')">評価数</th>
-  <th class="detail" onclick="sortBy('siteRating')">サイト</th>
-  <th class="detail" onclick="sortBy('authorRating')">同人物</th>
+  <th onclick="sortBy('fav')">⭐</th>
+  <th onclick="sortBy('ratingCount')">評価数</th>
+  <th onclick="sortBy('siteRating')">サイト</th>
+
   <th class="detail">更新日</th>
 
   <th>更新</th>
