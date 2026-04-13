@@ -167,3 +167,48 @@ window.resetAll = async ()=>{
   const snap = await getDocs(colRef);
   snap.forEach(d=>deleteDoc(doc(db,"items",d.id)));
 };
+// ================= ファイルの取り込み =================
+window.importCSV = async () => {
+  const file = document.getElementById("csvFile").files[0];
+  if (!file) return alert("ファイル選択してください");
+
+  const text = await file.text();
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+
+  const headers = lines[0].split(",");
+
+  let maxNo = 0;
+  lastSnapshot.forEach(d => {
+    if (d.no > maxNo) maxNo = d.no;
+  });
+
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(",");
+
+    const obj = {};
+    headers.forEach((h, j) => {
+      obj[h] = values[j];
+    });
+
+    const data = {
+      no: Number(obj.no) || ++maxNo,
+      main: Number(obj.main),
+      package: obj.package || "",
+      sub: obj.sub || "",
+      name: obj.name,
+      work: obj.work,
+      place: obj.place || "",
+      url: obj.url || "",
+      fav: Number(obj.fav) || 0,
+      ratingCount: Number(obj.ratingCount) || 0,
+      siteRating: Number(obj.siteRating) || 0,
+      date: new Date().toLocaleDateString()
+    };
+
+    if (!data.name || !data.work) continue;
+
+    await addDoc(colRef, data);
+  }
+
+  alert("CSV取込完了");
+};
