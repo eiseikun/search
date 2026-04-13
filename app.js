@@ -44,7 +44,7 @@ window.addItem = async () => {
   let maxNo = Math.max(0, ...lastSnapshot.map(d => d.no || 0));
 
   const data = {
-    main: Number(v("main")),
+    main: Number(v("main")) || 0,
     package: v("package"),
     sub: v("sub"),
     name: v("name"),
@@ -92,7 +92,7 @@ window.startEdit = (id, ...vals) => {
 };
 
 // =========================
-// 📅 更新
+// 📅 更新日
 // =========================
 window.updateDate = async id => {
   await updateDoc(doc(db,"items",id), {
@@ -110,7 +110,7 @@ window.sortBy = key => {
 };
 
 // =========================
-// 🔢 範囲
+// 🔢 範囲ソート補助
 // =========================
 function parseRange(v){
   if(!v) return {start:0,end:0};
@@ -193,24 +193,55 @@ window.render = function(){
 };
 
 // =========================
-// 🧩 UI
+// 🧩 列表示トグル（新方式）
 // =========================
-window.toggleDetails = () => {
+window.toggleColumnMode = () => {
   useColumnFilter = !useColumnFilter;
+
+  const btn = document.getElementById("columnToggleBtn");
+  if (btn) {
+    btn.textContent = useColumnFilter ? "全表示" : "選択列のみ";
+  }
+
   render();
 };
 
-window.toggleTools = () => {
-  const el = document.getElementById("tools");
-  el.style.display = el.style.display === "block" ? "none" : "block";
-};
+// =========================
+// 📊 列表示制御
+// =========================
+function applyColumnVisibility(){
+  const checks = document.querySelectorAll("#columnModal input[type='checkbox']");
 
+  checks.forEach(cb => {
+    const colIndex = Number(cb.dataset.col);
+
+    document.querySelectorAll(`td:nth-child(${colIndex}), th:nth-child(${colIndex})`)
+      .forEach(el => {
+        el.style.display = cb.checked ? "" : "none";
+      });
+  });
+}
+
+function showAllColumns(){
+  document.querySelectorAll("th, td")
+    .forEach(el => el.style.display = "");
+}
+
+// =========================
+// 🧩 UI
+// =========================
 window.openModal = () => document.getElementById("modal").style.display = "block";
 window.closeModal = () => document.getElementById("modal").style.display = "none";
 
 window.openColumnModal = () => {
   document.getElementById("columnModal").style.display = "block";
 };
+
+window.closeColumnModal = () => {
+  document.getElementById("columnModal").style.display = "none";
+};
+
+window.toggleName = el => el.classList.toggle("expanded");
 
 // =========================
 // 📂 CSV
@@ -234,7 +265,7 @@ async function importCSV(){
 
     await addDoc(colRef,{
       no: ++maxNo,
-      main:Number(obj.main),
+      main:Number(obj.main)||0,
       package:obj.package,
       sub:obj.sub,
       name:obj.name,
@@ -249,8 +280,6 @@ async function importCSV(){
   }
 }
 
-window.importCSV = importCSV;
-
 // =========================
 // 🧹 全削除
 // =========================
@@ -258,14 +287,4 @@ window.resetAll = async () => {
   if(!confirm("全削除？")) return;
   const snap = await getDocs(colRef);
   snap.forEach(d => deleteDoc(doc(db,"items",d.id)));
-};
-
-// =========================
-// 👤 名前
-// =========================
-window.toggleName = el => el.classList.toggle("expanded");
-
-
-window.closeColumnModal = () => {
-  document.getElementById("columnModal").style.display = "none";
 };
