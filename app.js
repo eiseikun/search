@@ -4,6 +4,9 @@ import {
   onSnapshot, updateDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ==============================
+// Firebase
+// ==============================
 const app = initializeApp({
   apiKey: "AIzaSyDJmfV7Vow1e_VjOv06h-n27fWB5KK1l4o",
   authDomain: "search-management-date.firebaseapp.com",
@@ -13,27 +16,34 @@ const app = initializeApp({
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
+// ==============================
+// 状態
+// ==============================
 let lastSnapshot = [];
 let editId = null;
 
 let columnMode = false;
 
-// ==========================
+let currentSort = "no";
+let sortAsc = true;
+
+// ==============================
 // Firestore
-// ==========================
+// ==============================
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-// ==========================
-// 保存 / 編集
-// ==========================
+// ==============================
+// 追加 / 編集
+// ==============================
 window.addItem = async () => {
   const v = id => document.getElementById(id).value;
 
   const data = {
+    no: 0,
     main: Number(v("main")),
     package: v("package"),
     sub: v("sub"),
@@ -47,10 +57,10 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.name || !data.work) return alert("必須");
+  if (!data.name || !data.work) return alert("必須項目");
 
   if (editId) {
-    await updateDoc(doc(db,"items",editId), data);
+    await updateDoc(doc(db, "items", editId), data);
     editId = null;
   } else {
     await addDoc(colRef, data);
@@ -60,59 +70,91 @@ window.addItem = async () => {
   closeModal();
 };
 
-// ==========================
+// ==============================
 // 削除
-// ==========================
+// ==============================
 window.remove = async id => {
   if (!confirm("削除？")) return;
-  await deleteDoc(doc(db,"items",id));
+  await deleteDoc(doc(db, "items", id));
 };
 
-// ==========================
+// ==============================
 // 編集
-// ==========================
-window.startEdit = (id,...vals) => {
+// ==============================
+window.startEdit = (id, ...vals) => {
   openModal();
   const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
-  keys.forEach((k,i)=>document.getElementById(k).value = vals[i]||"");
+  keys.forEach((k,i)=> document.getElementById(k).value = vals[i] || "");
   editId = id;
 };
 
-// ==========================
+// ==============================
 // 更新日
-// ==========================
+// ==============================
 window.updateDate = async id => {
-  await updateDoc(doc(db,"items",id),{
-    date:new Date().toLocaleDateString()
+  await updateDoc(doc(db, "items", id), {
+    date: new Date().toLocaleDateString()
   });
 };
 
-// ==========================
-// 描画
-// ==========================
+// ==============================
+// 検索＋描画
+// ==============================
 window.render = function(){
 
   const keyword = document.getElementById("search").value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
-    Object.values(d).some(v => String(v).toLowerCase().includes(keyword))
+    Object.values(d).some(v =>
+      String(v).toLowerCase().includes(keyword)
+    )
   );
+
+  // =========================
+  // ソート
+  // =========================
+  data = data.sort((a, b) => {
+
+    let A = a[currentSort];
+    let B = b[currentSort];
+
+    if (A == null) A = "";
+    if (B == null) B = "";
+
+    const numA = Number(A);
+    const numB = Number(B);
+    const isNum = !isNaN(numA) && !isNaN(numB);
+
+    if (isNum && A !== "" && B !== "") {
+      return sortAsc ? numA - numB : numB - numA;
+    }
+
+    if (currentSort === "date") {
+      return sortAsc
+        ? new Date(A) - new Date(B)
+        : new Date(B) - new Date(A);
+    }
+
+    return sortAsc
+      ? String(A).localeCompare(String(B), "ja", { numeric: true })
+      : String(B).localeCompare(String(A), "ja", { numeric: true });
+  });
 
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
   let html = "";
 
-  data.forEach(d=>{
+  data.forEach(d => {
     html += `
 <tr>
 <td>${d.no ?? "-"}</td>
 <td>${d.main}</td>
-<td>${d.package||""}</td>
+<td>${d.package || ""}</td>
 <td>${d.sub}</td>
 <td>${d.name}</td>
 <td>${d.work}</td>
-<td>${d.place||"-"}</td>
-<td>${d.url?`<a href="${d.url}" target="_blank">🔗</a>`:"-"}</td>
+<td>${d.place || "-"}</td>
+<td>${d.url ? `<a href="${d.url}" target="_blank">🔗</a>` : "-"}</td>
 <td>${d.fav}</td>
 <td>${d.ratingCount}</td>
 <td>${d.siteRating}</td>
@@ -126,35 +168,34 @@ window.render = function(){
   document.getElementById("list").innerHTML = html;
 
   applyColumnVisibility();
-  document.querySelectorAll("th").forEach(th => {
-  th.style.background = "";
-});
-
-const headers = document.querySelectorAll("th");
-const indexMap = {
-  no:0, main:1, package:2, sub:3,
-  name:4, work:5, place:6, url:7,
-  fav:8, ratingCount:9, siteRating:10, date:11
 };
 
-if (indexMap[currentSort] !== undefined) {
-  headers[indexMap[currentSort]].style.background = "#dfefff";
-}
+// ==============================
+// ソート
+// ==============================
+window.sortBy = (key) => {
+  if (currentSort === key) {
+    sortAsc = !sortAsc;
+  } else {
+    currentSort = key;
+    sortAsc = true;
+  }
+  render();
 };
 
-// ==========================
-// 列トグル（重要）
-// ==========================
+// ==============================
+// 列表示トグル
+// ==============================
 window.toggleDetails = () => {
   columnMode = !columnMode;
   applyColumnVisibility();
 };
 
-// ==========================
-// 列制御
-// ==========================
+// ==============================
+// 列表示制御
+// ==============================
 function getHiddenCols(){
-  return JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+  return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 }
 
 function applyColumnVisibility(){
@@ -162,8 +203,9 @@ function applyColumnVisibility(){
   const hidden = getHiddenCols();
   const rows = document.querySelectorAll("table tr");
 
-  rows.forEach(row=>{
-    [...row.children].forEach((cell,i)=>{
+  rows.forEach(row => {
+    [...row.children].forEach((cell, i) => {
+
       if (i === 0 || i >= row.children.length - 3) return;
 
       if (!columnMode) {
@@ -175,11 +217,11 @@ function applyColumnVisibility(){
   });
 }
 
-// ==========================
+// ==============================
 // チェック保存
-// ==========================
-document.addEventListener("change", e=>{
-  if(!e.target.dataset.col) return;
+// ==============================
+document.addEventListener("change", e => {
+  if (!e.target.dataset.col) return;
 
   const col = Number(e.target.dataset.col);
   let hidden = getHiddenCols();
@@ -193,88 +235,39 @@ document.addEventListener("change", e=>{
   localStorage.setItem("hiddenCols", JSON.stringify(hidden));
 });
 
-// ==========================
-// モーダル
-// ==========================
-window.openModal = () => document.getElementById("modal").style.display="block";
-window.closeModal = () => document.getElementById("modal").style.display="none";
-
-window.openColumnModal = () => {
-  document.getElementById("columnModal").style.display="block";
-  syncCheckbox();
-};
-
-window.closeColumnModal = () => {
-  document.getElementById("columnModal").style.display="none";
-};
-
+// ==============================
+// チェック同期
+// ==============================
 function syncCheckbox(){
   const hidden = getHiddenCols();
-  document.querySelectorAll("[data-col]").forEach(cb=>{
+  document.querySelectorAll("[data-col]").forEach(cb => {
     cb.checked = !hidden.includes(Number(cb.dataset.col));
   });
 }
 
-// ==========================
-// CSV・削除
-// ==========================
+window.openColumnModal = () => {
+  document.getElementById("columnModal").style.display = "block";
+  syncCheckbox();
+};
+
+window.closeColumnModal = () => {
+  document.getElementById("columnModal").style.display = "none";
+};
+
+// ==============================
+// モーダル
+// ==============================
+window.openModal = () =>
+  document.getElementById("modal").style.display = "block";
+
+window.closeModal = () =>
+  document.getElementById("modal").style.display = "none";
+
+// ==============================
+// CSV削除
+// ==============================
 window.resetAll = async () => {
-  if(!confirm("全削除？")) return;
+  if (!confirm("全削除？")) return;
   const snap = await getDocs(colRef);
-  snap.forEach(d => deleteDoc(doc(db,"items",d.id)));
+  snap.forEach(d => deleteDoc(doc(db, "items", d.id)));
 };
-
-// ==============================
-// 🔀 ソート状態
-// ==============================
-let currentSort = "no";
-let sortAsc = true;
-
-// ==============================
-// 🔀 ソート関数（全項目対応）
-// ==============================
-window.sortBy = (key) => {
-
-  if (currentSort === key) {
-    sortAsc = !sortAsc; // 同じ列ならトグル
-  } else {
-    currentSort = key;
-    sortAsc = true;
-  }
-
-  render();
-};
-data.sort((a,b)=>{
-
-  let A = a[currentSort];
-  let B = b[currentSort];
-
-  // =========================
-  // 数値ソート
-  // =========================
-  const numA = Number(A);
-  const numB = Number(B);
-
-  const isNum = !isNaN(numA) && !isNaN(numB);
-
-  if (isNum) {
-    return sortAsc ? numA - numB : numB - numA;
-  }
-
-  // =========================
-  // 日付ソート（日本形式対応）
-  // =========================
-  if (currentSort === "date") {
-    const dA = new Date(A);
-    const dB = new Date(B);
-
-    return sortAsc ? dA - dB : dB - dA;
-  }
-
-  // =========================
-  // 文字列ソート
-  // =========================
-  return sortAsc
-    ? String(A).localeCompare(String(B), 'ja', { numeric: true })
-    : String(B).localeCompare(String(A), 'ja', { numeric: true });
-});
