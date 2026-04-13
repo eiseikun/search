@@ -145,3 +145,51 @@ window.render = function(){
 
   list.innerHTML = html;
 };
+
+
+
+
+window.importCSV = async () => {
+  const file = document.getElementById("csvFile").files[0];
+  if (!file) return alert("ファイル選択して");
+
+  const text = await file.text();
+  const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+
+  // 1行目はヘッダー
+  const headers = lines[0].split(",");
+
+  let maxNo = 0;
+  lastSnapshot.forEach(d => {
+    if (d.no && d.no > maxNo) maxNo = d.no;
+  });
+
+  for (let i = 1; i < lines.length; i++){
+    const values = lines[i].split(",");
+
+    const obj = {};
+    headers.forEach((h, j) => {
+      obj[h] = values[j];
+    });
+
+    const data = {
+      no: ++maxNo,
+
+      main: Number(obj.main),
+      package: obj.package,
+      sub: obj.sub,
+      name: obj.name,
+      work: obj.work,
+      volume: obj.volume,
+      url: obj.url,
+      fav: Number(obj.fav) || 0,
+      ratingCount: Number(obj.ratingCount) || 0,
+      siteRating: Number(obj.siteRating) || 0,
+      date: new Date().toLocaleDateString()
+    };
+
+    await addDoc(colRef, data);
+  }
+
+  alert("CSV取り込み完了！");
+};
