@@ -14,20 +14,28 @@ const app = initializeApp({
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
+// ================= 列定義（最重要） =================
+const columns = [
+  "no","main","package","sub","name","work",
+  "place","url","fav","ratingCount","siteRating","date"
+];
+
 // ================= 状態 =================
 let lastSnapshot = [];
 let editId = null;
 
 let columnMode = false;
-
 let currentSort = "no";
 let sortAsc = true;
 
-// ================= 列定義（超重要） =================
-const columns = [
-  "no","main","package","sub","name","work",
-  "place","url","fav","ratingCount","siteRating","date"
-];
+// ================= 列設定保存 =================
+function getHiddenCols(){
+  return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+}
+
+function saveHiddenCols(arr){
+  localStorage.setItem("hiddenCols", JSON.stringify(arr));
+}
 
 // ================= Firestore =================
 onSnapshot(colRef, snap => {
@@ -76,8 +84,10 @@ window.remove = async id => {
 // ================= 編集 =================
 window.startEdit = (id,...vals) => {
   openModal();
-  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
-  keys.forEach((k,i)=>document.getElementById(k).value = vals[i]||"");
+  const keys = columns.slice(1,10); // 編集対象
+  keys.forEach((k,i)=>{
+    document.getElementById(k).value = vals[i] || "";
+  });
   editId = id;
 };
 
@@ -92,63 +102,32 @@ window.render = function(){
     )
   );
 
- // ===== ソート =====
-data = data.sort((a, b) => {
+  // ================= ソート =================
+  data = data.sort((a,b)=>{
 
-  // =========================
-  // 👤 名前：出現回数ソート（多い順）
-  // =========================
-  if (currentSort === "name") {
+    let A = a[currentSort] ?? "";
+    let B = b[currentSort] ?? "";
 
-    // 出現回数カウント
-    const nameCount = {};
-    data.forEach(d => {
-      const n = d.name || "";
-      nameCount[n] = (nameCount[n] || 0) + 1;
-    });
+    const numA = Number(A);
+    const numB = Number(B);
+    const isNum = !isNaN(numA) && !isNaN(numB);
 
-    const countA = nameCount[a.name || ""] || 0;
-    const countB = nameCount[b.name || ""] || 0;
+    if (isNum) return sortAsc ? numA - numB : numB - numA;
 
-    // 🔥 多い順が基本
-    if (countA !== countB) {
+    if (currentSort === "date") {
       return sortAsc
-        ? countB - countA   // 多い→少ない
-        : countA - countB;  // 少ない→多い
+        ? new Date(A) - new Date(B)
+        : new Date(B) - new Date(A);
     }
 
-    // 同じ件数なら名前順
     return sortAsc
-      ? String(a.name).localeCompare(String(b.name), "ja", { numeric: true })
-      : String(b.name).localeCompare(String(a.name), "ja", { numeric: true });
-  }
+      ? String(A).localeCompare(String(B),"ja",{numeric:true})
+      : String(B).localeCompare(String(A),"ja",{numeric:true});
+  });
 
-  // =========================
-  // 通常ソート
-  // =========================
-  let A = a[currentSort] ?? "";
-  let B = b[currentSort] ?? "";
-
-  const numA = Number(A);
-  const numB = Number(B);
-  const isNum = !isNaN(numA) && !isNaN(numB);
-
-  if (isNum) {
-    return sortAsc ? numA - numB : numB - numA;
-  }
-
-  if (currentSort === "date") {
-    return sortAsc
-      ? new Date(A) - new Date(B)
-      : new Date(B) - new Date(A);
-  }
-
-  return sortAsc
-    ? String(A).localeCompare(String(B), "ja", { numeric: true })
-    : String(B).localeCompare(String(A), "ja", { numeric: true });
-});
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
+  // ================= 表生成 =================
   let html = "";
 
   data.forEach(d=>{
@@ -187,61 +166,110 @@ window.sortBy = (key)=>{
 window.openModal = ()=>document.getElementById("modal").style.display="block";
 window.closeModal = ()=>document.getElementById("modal").style.display="none";
 
-window.openColumnModal = ()=>document.getElementById("columnModal").style.display="block";
-window.closeColumnModal = ()=>document.getElementById("columnModal").style.display="none";
-
 // ================= 列表示 =================
-window.toggleDetails = ()=>{ columnMode = !columnMode; };
-
-// ================= 全削除 =================
-window.resetAll = async ()=>{
-  if(!confirm("全削除？")) return;
-  const snap = await getDocs(colRef);
-  snap.forEach(d=>deleteDoc(doc(db,"items",d.id)));
+window.toggleDetails = ()=>{
+  columnMode = !columnMode;
+  applyColumnVisibility();
 };
-// ================= ファイルの取り込み =================
+
+// ================= 列表示制御 =================
+window.applyColumnVisibility = () => {
+
+  const hidden = getHiddenCols();
+  const rows = document.querySelectorAll("table tr");
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell,i)=>{
+
+      if (i >= columns.length) return;
+
+      if (!columnMode) {
+        cell.style.display = "";
+      } else {
+        cell.style.display = hidden.includes(i) ? "none" : "";
+      }
+    });
+  });
+};
+
+// ================= チェック操作 =================
+document.addEventListener("change", e=>{
+  if(!e.target.dataset.col) return;
+
+  const col = Number(e.target.dataset.col);
+  let hidden = getHiddenCols();
+
+  if(e.target.checked){
+    hidden = hidden.filter(x=>x!==col);
+  }else{
+    hidden.push(col);
+  }
+
+  saveHiddenCols(hidden);
+});
+
+// ================= チェック同期 =================
+function syncCheckbox(){
+  const hidden = getHiddenCols();
+  document.querySelectorAll("[data-col]").forEach(cb=>{
+    cb.checked = !hidden.includes(Number(cb.dataset.col));
+  });
+}
+
+window.openColumnModal = ()=>{
+  document.getElementById("columnModal").style.display="block";
+  syncCheckbox();
+};
+
+window.closeColumnModal = ()=>{
+  document.getElementById("columnModal").style.display="none";
+};
+
+// ================= CSV =================
 window.importCSV = async () => {
   const file = document.getElementById("csvFile").files[0];
-  if (!file) return alert("ファイル選択してください");
+  if (!file) return alert("ファイルなし");
 
   const text = await file.text();
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
-
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
   const headers = lines[0].split(",");
 
-  let maxNo = 0;
-  lastSnapshot.forEach(d => {
-    if (d.no > maxNo) maxNo = d.no;
-  });
+  let maxNo = Math.max(...lastSnapshot.map(d=>d.no||0),0);
 
-  for (let i = 1; i < lines.length; i++) {
+  for(let i=1;i<lines.length;i++){
     const values = lines[i].split(",");
-
     const obj = {};
-    headers.forEach((h, j) => {
-      obj[h] = values[j];
-    });
+
+    headers.forEach((h,j)=>obj[h]=values[j]);
 
     const data = {
-      no: Number(obj.no) || ++maxNo,
+      no: Number(obj.no)||++maxNo,
       main: Number(obj.main),
-      package: obj.package || "",
-      sub: obj.sub || "",
+      package: obj.package||"",
+      sub: obj.sub||"",
       name: obj.name,
       work: obj.work,
-      place: obj.place || "",
-      url: obj.url || "",
-      fav: Number(obj.fav) || 0,
-      ratingCount: Number(obj.ratingCount) || 0,
-      siteRating: Number(obj.siteRating) || 0,
+      place: obj.place||"",
+      url: obj.url||"",
+      fav: Number(obj.fav)||0,
+      ratingCount: Number(obj.ratingCount)||0,
+      siteRating: Number(obj.siteRating)||0,
       date: new Date().toLocaleDateString()
     };
 
-    if (!data.name || !data.work) continue;
-
-    await addDoc(colRef, data);
+    if(!data.name || !data.work) continue;
+    await addDoc(colRef,data);
   }
 
-  alert("CSV取込完了");
+  alert("CSV完了");
 };
-document.getElementById("csvBtn").addEventListener("click", importCSV);
+
+document.getElementById("csvBtn")
+  .addEventListener("click",importCSV);
+
+// ================= 更新日 =================
+window.updateDate = async id=>{
+  await updateDoc(doc(db,"items",id),{
+    date:new Date().toLocaleDateString()
+  });
+};
