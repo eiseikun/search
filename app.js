@@ -17,31 +17,28 @@ let lastSnapshot = [];
 let editId = null;
 let showDetails = true;
 let useColumnFilter = false;
-let currentSort = "main";
+let currentSort = "name";
 let sortAsc = true;
 
-/* モーダル */
-window.openModal = () => modal.style.display = "block";
-window.closeModal = () => modal.style.display = "none";
-
-window.openColumnModal = () => {
-  columnModal.style.display = "block";
-  applyCheckboxState();
-};
-window.closeColumnModal = () => columnModal.style.display = "none";
-
-/* データ取得 */
+/* Firestore */
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-/* 追加・更新 */
+/* 追加 */
 window.addItem = async () => {
   const val = id => document.getElementById(id).value;
 
+  let maxNo = 0;
+  lastSnapshot.forEach(d => {
+    if (d.no && d.no > maxNo) maxNo = d.no;
+  });
+
   const data = {
+    no: maxNo + 1,
+
     main: Number(val("main")),
     package: val("package"),
     sub: val("sub"),
@@ -52,11 +49,10 @@ window.addItem = async () => {
     fav: Number(val("fav")) || 0,
     ratingCount: Number(val("ratingCount")) || 0,
     siteRating: Number(val("siteRating")) || 0,
-    authorRating: Number(val("authorRating")) || 0,
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.main || !data.sub || !data.name || !data.work) return alert("必須項目入力");
+  if (!data.name || !data.work) return alert("必須項目入力");
 
   if (editId) {
     await updateDoc(doc(db, "items", editId), data);
@@ -66,7 +62,7 @@ window.addItem = async () => {
   }
 
   document.querySelectorAll("#modal input").forEach(i => i.value = "");
-  closeModal();
+  modal.style.display = "none";
 };
 
 /* 削除 */
@@ -77,8 +73,8 @@ window.remove = async id => {
 
 /* 編集 */
 window.startEdit = (id, ...vals) => {
-  openModal();
-  const keys = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating","authorRating"];
+  modal.style.display = "block";
+  const keys = ["main","package","sub","name","work","volume","url","fav","ratingCount","siteRating"];
   keys.forEach((k,i)=> document.getElementById(k).value = vals[i]||"");
   editId = id;
 };
@@ -95,88 +91,33 @@ window.sortBy = key => {
   render();
 };
 
-/* 切替 */
-window.toggleDetails = () => {
-  useColumnFilter = !useColumnFilter;
-  showDetails = !showDetails;
-  render();
-};
-
-/* チェック保存 */
-document.addEventListener("change", e=>{
-  if(!e.target.dataset.col) return;
-
-  const index = Number(e.target.dataset.col);
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
-
-  if (e.target.checked) {
-    const i = hidden.indexOf(index);
-    if (i !== -1) hidden.splice(i,1);
-  } else {
-    if (!hidden.includes(index)) hidden.push(index);
-  }
-
-  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
-});
-
-/* 列制御 */
-function applyColumnVisibility(){
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
-
-  const rows = document.querySelectorAll("table tr"); // ← ここ重要
-
-  rows.forEach(row=>{
-    const cells = row.children;
-
-    for (let i = 0; i < cells.length; i++){
-      if (i === 0) continue; // No列は常に表示
-      if (i >= cells.length - 3) continue; // 更新・編集・削除は表示
-
-      cells[i].style.display = hidden.includes(i) ? "none" : "";
-    }
-  });
-}
-
-function showAllColumns(){
-  document.querySelectorAll("table tr").forEach(row=>{
-    Array.from(row.children).forEach(cell=>{
-      cell.style.display = "";
-    });
-  });
-}
-
-function applyCheckboxState(){
-  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
-  document.querySelectorAll("[data-col]").forEach(cb=>{
-    cb.checked = !hidden.includes(Number(cb.dataset.col));
-  });
-}
-
 /* 描画 */
 window.render = function(){
 
   const keyword = search.value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
-    d.name?.toLowerCase().includes(keyword) ||
-    d.work?.toLowerCase().includes(keyword)
+    Object.values(d).some(v =>
+      String(v).toLowerCase().includes(keyword)
+    )
   );
 
   data.sort((a,b)=>{
-    let A = a[currentSort] || "";
-    let B = b[currentSort] || "";
-    if (A > B) return sortAsc ? 1 : -1;
-    if (A < B) return sortAsc ? -1 : 1;
-    return 0;
+    let A = a[currentSort];
+    let B = b[currentSort];
+
+    if (!isNaN(A) && !isNaN(B)) return sortAsc ? A-B : B-A;
+    return sortAsc ? String(A).localeCompare(String(B)) : String(B).localeCompare(String(A));
   });
 
   resultCount.textContent = `${data.length}件`;
 
   let html = "";
+
   data.forEach((d,i)=>{
     html += `
 <tr>
-<td>${i+1}</td>
+<td>${d.no ?? "-"}</td>
 <td>${d.main}</td>
 <td>${d.package||""}</td>
 <td>${d.sub}</td>
@@ -184,25 +125,16 @@ window.render = function(){
 <td><div class="work-text">${d.work}</div></td>
 <td>${d.volume||"-"}</td>
 <td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
-
-<td class="detail">${d.fav}</td>
-<td class="detail">${d.ratingCount}</td>
-<td class="detail">${d.siteRating}</td>
-<td class="detail">${d.authorRating}</td>
+<td>${d.fav}</td>
+<td>${d.ratingCount}</td>
+<td>${d.siteRating}</td>
 <td class="detail">${d.date}</td>
 
 <td><button onclick="updateDate('${d.id}')">更新</button></td>
-<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.authorRating}')">編集</button></td>
+<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.volume}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
   });
 
   list.innerHTML = html;
-
-  if (useColumnFilter) applyColumnVisibility();
-  else showAllColumns();
-
-  document.querySelectorAll(".detail").forEach(el=>{
-    el.style.display = showDetails ? "" : "none";
-  });
 };
