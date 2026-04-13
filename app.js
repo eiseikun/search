@@ -36,9 +36,8 @@ window.addItem = async () => {
     if (d.no && d.no > maxNo) maxNo = d.no;
   });
 
+  // 🔥 ここ重要
   const data = {
-    no: maxNo + 1,
-
     main: Number(val("main")),
     package: val("package"),
     sub: val("sub"),
@@ -55,9 +54,17 @@ window.addItem = async () => {
   if (!data.name || !data.work) return alert("必須項目入力");
 
   if (editId) {
+    // ✅ 編集時はNoを維持
+    const old = lastSnapshot.find(d => d.id === editId);
+    data.no = old?.no ?? 1;
+
     await updateDoc(doc(db, "items", editId), data);
     editId = null;
+
   } else {
+    // ✅ 新規時だけNoを振る
+    data.no = maxNo + 1;
+
     await addDoc(colRef, data);
   }
 
