@@ -168,6 +168,8 @@ window.resetAll = async ()=>{
   snap.forEach(d=>deleteDoc(doc(db,"items",d.id)));
 };
 // ================= ファイルの取り込み =================
+document.getElementById("csvBtn").addEventListener("click", importCSV);
+
 window.importCSV = async () => {
   const file = document.getElementById("csvFile").files[0];
   if (!file) return alert("ファイル選択してください");
