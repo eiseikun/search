@@ -110,3 +110,63 @@ tr:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
+/* スマホ最適化 */
+@media (max-width: 768px){
+
+  body{
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  h1{
+    font-size: 18px;
+  }
+
+  .search-bar{
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .search-bar input{
+    flex: 1 1 100%;
+    font-size: 14px;
+  }
+
+  button{
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+
+  table{
+    font-size: 11px;
+  }
+
+  td, th{
+    padding: 4px;
+  }
+
+  /* URLをコンパクトに */
+  td a{
+    font-size: 0;
+  }
+
+  td a::after{
+    content: "🔗";
+    font-size: 14px;
+  }
+
+  /* 長い文字省略 */
+  td{
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 名前と作品だけ広め */
+  td:nth-child(5),
+  td:nth-child(6){
+    max-width: 120px;
+  }
+
+}
