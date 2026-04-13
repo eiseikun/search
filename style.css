@@ -132,3 +132,16 @@ td:nth-child(8) a::after {
   cursor: pointer;
   font-size: 20px;
 }
+/* ======================
+管理バー
+====================== */
+.admin-bar {
+  display: none; /* 初期非表示 */
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* 表示時 */
+.admin-bar.show {
+  display: flex;
+}
