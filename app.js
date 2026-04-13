@@ -13,11 +13,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
+/* 状態 */
 let lastSnapshot = [];
 let editId = null;
-let showDetails = true;
-let useColumnFilter = false;
-let currentSort = "name";
+let currentSort = "no";
 let sortAsc = true;
 
 /* Firestore */
@@ -27,7 +26,9 @@ onSnapshot(colRef, snap => {
   render();
 });
 
-/* 追加 */
+/* ==============================
+   追加 / 編集
+============================== */
 window.addItem = async () => {
   const val = id => document.getElementById(id).value;
 
@@ -36,7 +37,6 @@ window.addItem = async () => {
     if (d.no && d.no > maxNo) maxNo = d.no;
   });
 
-  // 🔥 ここ重要
   const data = {
     main: Number(val("main")),
     package: val("package"),
@@ -54,17 +54,12 @@ window.addItem = async () => {
   if (!data.name || !data.work) return alert("必須項目入力");
 
   if (editId) {
-    // ✅ 編集時はNoを維持
     const old = lastSnapshot.find(d => d.id === editId);
     data.no = old?.no ?? 1;
-
     await updateDoc(doc(db, "items", editId), data);
     editId = null;
-
   } else {
-    // ✅ 新規時だけNoを振る
     data.no = maxNo + 1;
-
     await addDoc(colRef, data);
   }
 
@@ -91,17 +86,34 @@ window.updateDate = async id => {
   await updateDoc(doc(db,"items",id),{date:new Date().toLocaleDateString()});
 };
 
-/* ソート */
+/* ==============================
+   ソート
+============================== */
 window.sortBy = key => {
   if (currentSort === key) sortAsc = !sortAsc;
   else { currentSort = key; sortAsc = true; }
   render();
 };
 
-/* 描画 */
+/* ==============================
+   範囲パース（完全版）
+============================== */
+function parseRange(val) {
+  if (!val) return { start: 0, end: 0 };
+
+  const parts = String(val).split("-");
+  const start = Number(parts[0]) || 0;
+  const end = parts[1] ? Number(parts[1]) : start;
+
+  return { start, end };
+}
+
+/* ==============================
+   描画
+============================== */
 window.render = function(){
 
-  const keyword = search.value.toLowerCase();
+  const keyword = document.getElementById("search").value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
     Object.values(d).some(v =>
@@ -110,18 +122,44 @@ window.render = function(){
   );
 
   data.sort((a,b)=>{
+
+    // 🔥 sub（完全版）
+    if (currentSort === "sub") {
+
+      // main優先
+      if (a.main !== b.main) {
+        return sortAsc ? a.main - b.main : b.main - a.main;
+      }
+
+      const A = parseRange(a.sub);
+      const B = parseRange(b.sub);
+
+      if (A.start !== B.start) {
+        return sortAsc ? A.start - B.start : B.start - A.start;
+      }
+
+      return sortAsc ? A.end - B.end : B.end - A.end;
+    }
+
+    // 数値
     let A = a[currentSort];
     let B = b[currentSort];
 
-    if (!isNaN(A) && !isNaN(B)) return sortAsc ? A-B : B-A;
-    return sortAsc ? String(A).localeCompare(String(B)) : String(B).localeCompare(String(A));
+    if (!isNaN(A) && !isNaN(B)) {
+      return sortAsc ? A - B : B - A;
+    }
+
+    // 文字
+    return sortAsc
+      ? String(A).localeCompare(String(B))
+      : String(B).localeCompare(String(A));
   });
 
   resultCount.textContent = `${data.length}件`;
 
   let html = "";
 
-  data.forEach((d,i)=>{
+  data.forEach((d)=>{
     html += `
 <tr>
 <td>${d.no ?? "-"}</td>
@@ -135,7 +173,7 @@ window.render = function(){
 <td>${d.fav}</td>
 <td>${d.ratingCount}</td>
 <td>${d.siteRating}</td>
-<td class="detail">${d.date}</td>
+<td>${d.date}</td>
 
 <td><button onclick="updateDate('${d.id}')">更新</button></td>
 <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
@@ -143,12 +181,13 @@ window.render = function(){
 </tr>`;
   });
 
-  list.innerHTML = html;
+  document.getElementById("list").innerHTML = html;
 };
 
-
-
-window.importCSV = async () => {
+/* ==============================
+   CSV取込
+============================== */
+async function importCSV() {
   const file = document.getElementById("csvFile").files[0];
   if (!file) return alert("ファイル選択して");
 
@@ -173,21 +212,15 @@ window.importCSV = async () => {
       obj[h] = values[j] || "";
     });
 
-    // 🔥 ここログ確認
-    console.log(obj);
-
     const data = {
-      no: ++maxNo,
+      no: Number(obj.no) || ++maxNo,
 
       main: Number(obj.main),
       package: obj.package,
       sub: obj.sub,
       name: obj.name,
       work: obj.work,
-
-      // 🔥 修正（ここ重要）
       place: obj.place,
-
       url: obj.url,
       fav: Number(obj.fav) || 0,
       ratingCount: Number(obj.ratingCount) || 0,
@@ -195,20 +228,18 @@ window.importCSV = async () => {
       date: new Date().toLocaleDateString()
     };
 
-    // 🔥 念のためチェック
-    if (!data.name || !data.work){
-      console.log("スキップ:", obj);
-      continue;
-    }
+    if (!data.name || !data.work) continue;
 
     await addDoc(colRef, data);
     count++;
 
-    await new Promise(r => setTimeout(r, 30));
+    await new Promise(r => setTimeout(r, 20));
   }
 
   alert(`CSV取り込み完了：${count}件`);
-};
+}
+
+/* CSV解析 */
 function parseCSVLine(line) {
   const result = [];
   let current = "";
@@ -230,4 +261,11 @@ function parseCSVLine(line) {
   result.push(current);
   return result;
 }
+
+/* ==============================
+   ボタン接続（重要）
+============================== */
 document.getElementById("csvBtn").addEventListener("click", importCSV);
+
+/* module対策 */
+window.importCSV = importCSV;
