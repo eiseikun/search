@@ -230,3 +230,4 @@ function parseCSVLine(line) {
   result.push(current);
   return result;
 }
+document.getElementById("csvBtn").addEventListener("click", importCSV);
