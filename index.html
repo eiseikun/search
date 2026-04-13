@@ -12,16 +12,13 @@
 
 <h1>📚 作品管理</h1>
 
-<!-- ======================
-🔍 ツールバー
-====================== -->
 <div class="search-bar">
   <input id="search" placeholder="🔍 検索..." oninput="render()">
-
   <button onclick="toggleDetails()">選択列のみ</button>
-  <button onclick="openColumnModal()">⚙️列設定</button>
+  <button onclick="openColumnModal()">⚙️</button>
   <button onclick="openModal()">＋追加</button>
 </div>
+
 
 <!-- ======================
 📂 管理ボタン（通常は隠す想定）
@@ -36,14 +33,10 @@
   <span id="resultCount"></span>
 </div>
 
-<!-- ======================
-⚙️ 列設定モーダル
-====================== -->
+<!-- 列設定 -->
 <div id="columnModal" class="modal">
   <div class="modal-content">
-
     <span class="close" onclick="closeColumnModal()">&times;</span>
-
     <h3>列表示設定</h3>
 
     <div class="column-grid">
@@ -63,12 +56,9 @@
   </div>
 </div>
 
-<!-- ======================
-➕ 追加モーダル
-====================== -->
+<!-- モーダル -->
 <div id="modal" class="modal">
   <div class="modal-content">
-
     <span class="close" onclick="closeModal()">&times;</span>
 
     <input id="main" placeholder="大分類">
@@ -80,18 +70,15 @@
     <input id="place" placeholder="部分">
 
     <input id="url" placeholder="URL">
+
     <input id="fav" placeholder="⭐">
     <input id="ratingCount" placeholder="評価数">
     <input id="siteRating" placeholder="サイト評価">
 
     <button onclick="addItem()">保存</button>
-
   </div>
 </div>
 
-<!-- ======================
-📊 テーブル
-====================== -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -100,14 +87,19 @@
   <th onclick="sortBy('main')">大</th>
   <th onclick="sortBy('package')">パッケージ</th>
   <th onclick="sortBy('sub')">小</th>
+
   <th onclick="sortBy('name')">名前</th>
   <th onclick="sortBy('work')">作品</th>
+
   <th onclick="sortBy('place')">部分</th>
   <th onclick="sortBy('url')">URL</th>
+
   <th onclick="sortBy('fav')">⭐</th>
   <th onclick="sortBy('ratingCount')">評価数</th>
   <th onclick="sortBy('siteRating')">サイト</th>
+
   <th onclick="sortBy('date')">更新日</th>
+
   <th>更新</th>
   <th>編集</th>
   <th>削除</th>
@@ -117,16 +109,12 @@
 <tbody id="list"></tbody>
 </table>
 </div>
-
-<!-- ======================
-👤 名前モーダル
-====================== -->
+<!-- 名前表示モーダル -->
 <div id="nameModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeNameModal()">&times;</span>
-    <div id="nameModalText"></div>
+    <div id="nameModalText" style="word-break: break-word;"></div>
   </div>
 </div>
-
 </body>
 </html>
