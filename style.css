@@ -110,3 +110,21 @@ tr:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
+/* ===== 基本：全部1行で省略 ===== */
+td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== 作品列だけ2行表示 ===== */
+/* 作品は6列目（No=1として） */
+td:nth-child(6) {
+  white-space: normal;           /* 折り返し許可 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* 2行まで */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+  max-height: 2.4em;             /* 2行分 */
+}
