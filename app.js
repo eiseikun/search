@@ -26,6 +26,8 @@ let currentSort = "no";
 let sortAsc = true;
 let useColumnFilter = false;
 
+const COLUMN_KEY = "column-settings";
+
 // =========================
 // 🔄 Firestore取得
 // =========================
@@ -110,7 +112,7 @@ window.sortBy = key => {
 };
 
 // =========================
-// 🔢 範囲ソート補助
+// 🔢 範囲ソート
 // =========================
 function parseRange(v){
   if(!v) return {start:0,end:0};
@@ -141,9 +143,7 @@ window.render = function(){
     if (currentSort === "name") {
       const ca = nameCount[a.name] || 0;
       const cb = nameCount[b.name] || 0;
-
       if (ca !== cb) return sortAsc ? ca - cb : cb - ca;
-
       return String(a.name).localeCompare(String(b.name),'ja',{numeric:true});
     }
 
@@ -188,12 +188,14 @@ window.render = function(){
 </tr>
 `).join("");
 
-  if (useColumnFilter) applyColumnVisibility();
-  else showAllColumns();
+  setTimeout(() => {
+    if (useColumnFilter) applyColumnVisibility();
+    else showAllColumns();
+  }, 0);
 };
 
 // =========================
-// 🧩 列表示トグル（新方式）
+// 🧩 列表示トグル（修正版）
 // =========================
 window.toggleColumnMode = () => {
   useColumnFilter = !useColumnFilter;
@@ -228,19 +230,65 @@ function showAllColumns(){
 }
 
 // =========================
-// 🧩 UI
+// 📂 管理ボタン（修正版）
+// =========================
+window.toggleTools = () => {
+  const el = document.getElementById("tools");
+  const isHidden = getComputedStyle(el).display === "none";
+  el.style.display = isHidden ? "block" : "none";
+};
+
+// =========================
+// 🧩 モーダル
 // =========================
 window.openModal = () => document.getElementById("modal").style.display = "block";
 window.closeModal = () => document.getElementById("modal").style.display = "none";
 
 window.openColumnModal = () => {
   document.getElementById("columnModal").style.display = "block";
+  loadColumnSettings();
 };
 
 window.closeColumnModal = () => {
   document.getElementById("columnModal").style.display = "none";
 };
 
+// =========================
+// 💾 列設定保存
+// =========================
+function saveColumnSettings(){
+  const data = {};
+  document.querySelectorAll("#columnModal input[type='checkbox']")
+    .forEach(cb => {
+      data[cb.dataset.col] = cb.checked;
+    });
+
+  localStorage.setItem(COLUMN_KEY, JSON.stringify(data));
+}
+
+function loadColumnSettings(){
+  const saved = localStorage.getItem(COLUMN_KEY);
+  if(!saved) return;
+
+  const data = JSON.parse(saved);
+
+  document.querySelectorAll("#columnModal input[type='checkbox']")
+    .forEach(cb => {
+      cb.checked = data[cb.dataset.col] ?? true;
+    });
+}
+
+// 即保存
+document.addEventListener("change", (e) => {
+  if (e.target.matches("#columnModal input[type='checkbox']")) {
+    saveColumnSettings();
+    if (useColumnFilter) applyColumnVisibility();
+  }
+});
+
+// =========================
+// 👤 名前展開
+// =========================
 window.toggleName = el => el.classList.toggle("expanded");
 
 // =========================
