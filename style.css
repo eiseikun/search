@@ -161,4 +161,21 @@ td:nth-child(9){
 
   gap: 12px;
 }
+/* ==============================
+   👤 名前：通常（1行省略）
+============================== */
+.name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* ==============================
+   👤 展開時
+============================== */
+.name-text.expanded {
+  white-space: normal;     /* 改行OK */
+  overflow: visible;
+}
 
