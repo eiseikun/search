@@ -111,10 +111,41 @@ window.render = function(){
   );
 
   // =========================
+  // 👤 名前の出現回数カウント
+  // =========================
+  const nameCount = {};
+  data.forEach(d => {
+    const n = d.name || "";
+    nameCount[n] = (nameCount[n] || 0) + 1;
+  });
+
+  // =========================
   // ソート
   // =========================
   data = data.sort((a, b) => {
 
+    // =========================
+    // 👤 名前：件数ソート
+    // =========================
+    if (currentSort === "name") {
+
+      const countA = nameCount[a.name || ""] || 0;
+      const countB = nameCount[b.name || ""] || 0;
+
+      // 件数で比較
+      if (countA !== countB) {
+        return sortAsc ? countA - countB : countB - countA;
+      }
+
+      // 同じ件数なら名前順
+      return sortAsc
+        ? String(a.name).localeCompare(String(b.name), "ja", { numeric: true })
+        : String(b.name).localeCompare(String(a.name), "ja", { numeric: true });
+    }
+
+    // =========================
+    // 通常ソート
+    // =========================
     let A = a[currentSort];
     let B = b[currentSort];
 
