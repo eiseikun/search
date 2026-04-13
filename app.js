@@ -264,3 +264,8 @@ window.resetAll = async () => {
 // 👤 名前
 // =========================
 window.toggleName = el => el.classList.toggle("expanded");
+
+
+window.closeColumnModal = () => {
+  document.getElementById("columnModal").style.display = "none";
+};
