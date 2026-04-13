@@ -100,10 +100,11 @@ window.sortBy = key => {
 ============================== */
 function parseRange(val) {
   if (!val) return { start: 0, end: 0 };
-
-  const parts = String(val).split("-");
-  const start = Number(parts[0]) || 0;
-  const end = parts[1] ? Number(parts[1]) : start;
+  // 🔥 空白除去（これ超重要）
+  val = String(val).trim();
+  const parts = val.split("-");
+  const start = Number(parts[0].trim()) || 0;
+  const end = parts[1] ? Number(parts[1].trim()) : start;
 
   return { start, end };
 }
@@ -120,40 +121,34 @@ window.render = function(){
       String(v).toLowerCase().includes(keyword)
     )
   );
-
   data.sort((a,b)=>{
 
-    // 🔥 sub（完全版）
-    if (currentSort === "sub") {
+  if (currentSort === "sub") {
 
-      // main優先
-      if (a.main !== b.main) {
-        return sortAsc ? a.main - b.main : b.main - a.main;
-      }
+    const A = parseRange(a.sub);
+    const B = parseRange(b.sub);
 
-      const A = parseRange(a.sub);
-      const B = parseRange(b.sub);
-
-      if (A.start !== B.start) {
-        return sortAsc ? A.start - B.start : B.start - A.start;
-      }
-
-      return sortAsc ? A.end - B.end : B.end - A.end;
+    // 開始値
+    if (A.start !== B.start) {
+      return sortAsc ? A.start - B.start : B.start - A.start;
     }
 
-    // 数値
-    let A = a[currentSort];
-    let B = b[currentSort];
+    // 終了値
+    return sortAsc ? A.end - B.end : B.end - A.end;
+  }
 
-    if (!isNaN(A) && !isNaN(B)) {
-      return sortAsc ? A - B : B - A;
-    }
+  let A = a[currentSort];
+  let B = b[currentSort];
 
-    // 文字
-    return sortAsc
-      ? String(A).localeCompare(String(B))
-      : String(B).localeCompare(String(A));
-  });
+  if (!isNaN(A) && !isNaN(B)) {
+    return sortAsc ? A - B : B - A;
+  }
+
+  return sortAsc
+    ? String(A).localeCompare(String(B))
+    : String(B).localeCompare(String(A));
+});
+ 
 
   resultCount.textContent = `${data.length}件`;
 
