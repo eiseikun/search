@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>作品管理</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品管理</title>
 
 <link rel="stylesheet" href="style.css">
 <script type="module" src="app.js"></script>
@@ -11,52 +11,42 @@
 
 <body>
 
-<!-- ==============================
-  📚 タイトル
-============================== -->
 <h1>📚 作品管理</h1>
 
-
-<!-- ==============================
-  🔍 検索バー + 操作
-============================== -->
+<!-- =========================
+🔍 検索・操作バー
+========================= -->
 <div class="search-bar">
   <input id="search" placeholder="🔍 検索..." oninput="render()">
 
   <button onclick="toggleDetails()">選択列のみ</button>
-  <button onclick="openColumnModal()">⚙️</button>
+  <button onclick="openColumnModal()">⚙️列設定</button>
   <button onclick="openModal()">＋追加</button>
 
-  <!-- 🔥 CSV表示トグル -->
-  <button onclick="toggleCSV()">📂</button>
+  <!-- CSV / 管理ツール（非表示切替） -->
+  <button onclick="toggleTools()">📂管理</button>
 </div>
 
-
-<!-- ==============================
-  📂 CSV操作（通常は非表示）
-============================== -->
-<div id="csvArea">
+<!-- =========================
+📂 管理ツール（普段非表示）
+========================= -->
+<div id="tools" class="tools">
   <input type="file" id="csvFile" accept=".csv">
   <button id="csvBtn">CSV取込</button>
   <button onclick="resetAll()" class="danger">全削除</button>
 </div>
 
-
-<!-- ==============================
-  📊 件数表示
-============================== -->
+<!-- 件数 -->
 <div class="result-bar">
   <span id="resultCount"></span>
 </div>
 
-
-<!-- ==============================
-  ⚙️ 列表示設定モーダル
-============================== -->
+<!-- =========================
+⚙️ 列設定モーダル
+========================= -->
 <div id="columnModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeColumnModal()">&times;</span>
-
     <h3>列表示設定</h3>
 
     <div class="column-grid">
@@ -75,20 +65,19 @@
   </div>
 </div>
 
-
-<!-- ==============================
-  ➕ 追加モーダル
-============================== -->
+<!-- =========================
+➕ 追加・編集モーダル
+========================= -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
 
     <input id="main" placeholder="大分類">
-    <input id="package" placeholder="パッケージ名">
+    <input id="package" placeholder="パッケージ">
     <input id="sub" placeholder="小分類">
 
     <input id="name" placeholder="名前">
-    <input id="work" placeholder="作品名">
+    <input id="work" placeholder="作品">
     <input id="place" placeholder="部分">
 
     <input id="url" placeholder="URL">
@@ -101,10 +90,9 @@
   </div>
 </div>
 
-
-<!-- ==============================
-  📊 テーブル
-============================== -->
+<!-- =========================
+📊 テーブル
+========================= -->
 <div class="table-wrap">
 <table>
 <thead>
