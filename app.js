@@ -264,3 +264,15 @@ document.getElementById("csvBtn").addEventListener("click", importCSV);
 
 /* module対策 */
 window.importCSV = importCSV;
+
+window.resetAll = async () => {
+  if (!confirm("全部削除します。本当にOK？")) return;
+
+  const snapshot = await getDocs(colRef);
+
+  for (const d of snapshot.docs) {
+    await deleteDoc(doc(db, "items", d.id));
+  }
+
+  alert("全削除完了");
+};
