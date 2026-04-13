@@ -231,24 +231,27 @@ function applyColumnVisibility(){
 
   const checks = document.querySelectorAll("#columnModal input[type='checkbox']");
 
-  // 全部非表示（安全リセット）
-  document.querySelectorAll("[data-col],[data-role]")
-    .forEach(el => el.style.display = "");
+  // 全列リセット
+  document.querySelectorAll("[data-col]").forEach(el => {
+    el.style.display = "";
+  });
 
-  // 列制御
+  // チェック反映
   checks.forEach(cb => {
     const col = cb.dataset.col;
 
+    const show = cb.checked;
+
     document.querySelectorAll(`[data-col="${col}"]`)
       .forEach(el => {
-        el.style.display = cb.checked ? "" : "none";
+        el.style.display = show ? "" : "none";
       });
   });
 
-  // 操作列は非表示
+  // 操作列は非表示（選択列のみ時）
   document.querySelectorAll("[data-role]")
-    .forEach(btn => {
-      btn.style.display = "none";
+    .forEach(el => {
+      el.style.display = "none";
     });
 
   // No列は必ず表示
@@ -257,7 +260,6 @@ function applyColumnVisibility(){
 }
 
 function showAllColumns(){
-
   document.querySelectorAll("[data-col],[data-role]")
     .forEach(el => el.style.display = "");
 }
