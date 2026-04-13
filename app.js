@@ -4,38 +4,34 @@ import {
   onSnapshot, updateDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyDJmfV7Vow1e_VjOv06h-n27fWB5KK1l4o",
   authDomain: "search-management-date.firebaseapp.com",
   projectId: "search-management-date",
-};
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
 let lastSnapshot = [];
 let editId = null;
-let currentSort = "no";
-let sortAsc = true;
-let useColumnFilter = false;
 
-// =========================
-// 🔄 Firestore
-// =========================
+let columnMode = false;
+
+// ==========================
+// Firestore
+// ==========================
 onSnapshot(colRef, snap => {
   lastSnapshot = [];
   snap.forEach(d => lastSnapshot.push({ id: d.id, ...d.data() }));
   render();
 });
 
-// =========================
-// ➕ 追加 / 編集
-// =========================
+// ==========================
+// 保存 / 編集
+// ==========================
 window.addItem = async () => {
   const v = id => document.getElementById(id).value;
-
-  let maxNo = Math.max(0, ...lastSnapshot.map(d => d.no || 0));
 
   const data = {
     main: Number(v("main")),
@@ -51,15 +47,12 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.name || !data.work) return alert("必須項目");
+  if (!data.name || !data.work) return alert("必須");
 
   if (editId) {
-    const old = lastSnapshot.find(d => d.id === editId);
-    data.no = old?.no ?? 1;
-    await updateDoc(doc(db, "items", editId), data);
+    await updateDoc(doc(db,"items",editId), data);
     editId = null;
   } else {
-    data.no = maxNo + 1;
     await addDoc(colRef, data);
   }
 
@@ -67,46 +60,38 @@ window.addItem = async () => {
   closeModal();
 };
 
-// =========================
-// 🗑️ 削除
-// =========================
+// ==========================
+// 削除
+// ==========================
 window.remove = async id => {
   if (!confirm("削除？")) return;
-  await deleteDoc(doc(db, "items", id));
+  await deleteDoc(doc(db,"items",id));
 };
 
-// =========================
-// ✏️ 編集
-// =========================
-window.startEdit = (id, ...vals) => {
+// ==========================
+// 編集
+// ==========================
+window.startEdit = (id,...vals) => {
   openModal();
   const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
-  keys.forEach((k,i)=>document.getElementById(k).value = vals[i] || "");
+  keys.forEach((k,i)=>document.getElementById(k).value = vals[i]||"");
   editId = id;
 };
 
-// =========================
-// 📅 更新
-// =========================
+// ==========================
+// 更新日
+// ==========================
 window.updateDate = async id => {
-  await updateDoc(doc(db,"items",id), {
-    date: new Date().toLocaleDateString()
+  await updateDoc(doc(db,"items",id),{
+    date:new Date().toLocaleDateString()
   });
 };
 
-// =========================
-// 🔀 ソート
-// =========================
-window.sortBy = key => {
-  if (currentSort === key) sortAsc = !sortAsc;
-  else { currentSort = key; sortAsc = true; }
-  render();
-};
-
-// =========================
-// 🖥️ 描画
-// =========================
+// ==========================
+// 描画
+// ==========================
 window.render = function(){
+
   const keyword = document.getElementById("search").value.toLowerCase();
 
   let data = lastSnapshot.filter(d =>
@@ -115,61 +100,112 @@ window.render = function(){
 
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
-  document.getElementById("list").innerHTML = data.map(d =>
-  `<tr>
-    <td>${d.no ?? "-"}</td>
-    <td>${d.main}</td>
-    <td>${d.package||""}</td>
-    <td>${d.sub}</td>
-    <td>${d.name}</td>
-    <td>${d.work}</td>
-    <td>${d.place||"-"}</td>
-    <td>${d.url?`<a href="${d.url}" target="_blank">🔗</a>`:"-"}</td>
-    <td>${d.fav}</td>
-    <td>${d.ratingCount}</td>
-    <td>${d.siteRating}</td>
-    <td>${d.date}</td>
-    <td><button onclick="updateDate('${d.id}')">更新</button></td>
-    <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
-    <td><button onclick="remove('${d.id}')">削除</button></td>
-  </tr>`
-  ).join("");
+  let html = "";
+
+  data.forEach(d=>{
+    html += `
+<tr>
+<td>${d.no ?? "-"}</td>
+<td>${d.main}</td>
+<td>${d.package||""}</td>
+<td>${d.sub}</td>
+<td>${d.name}</td>
+<td>${d.work}</td>
+<td>${d.place||"-"}</td>
+<td>${d.url?`<a href="${d.url}" target="_blank">🔗</a>`:"-"}</td>
+<td>${d.fav}</td>
+<td>${d.ratingCount}</td>
+<td>${d.siteRating}</td>
+<td>${d.date}</td>
+<td><button onclick="updateDate('${d.id}')">更新</button></td>
+<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
+<td><button onclick="remove('${d.id}')">削除</button></td>
+</tr>`;
+  });
+
+  document.getElementById("list").innerHTML = html;
+
+  applyColumnVisibility();
 };
 
-// =========================
-// 🧩 モーダル制御（ここが重要）
-// =========================
-window.openModal = () => {
-  document.getElementById("modal").style.display = "block";
+// ==========================
+// 列トグル（重要）
+// ==========================
+window.toggleDetails = () => {
+  columnMode = !columnMode;
+  applyColumnVisibility();
 };
 
-window.closeModal = () => {
-  document.getElementById("modal").style.display = "none";
-};
+// ==========================
+// 列制御
+// ==========================
+function getHiddenCols(){
+  return JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+}
+
+function applyColumnVisibility(){
+
+  const hidden = getHiddenCols();
+  const rows = document.querySelectorAll("table tr");
+
+  rows.forEach(row=>{
+    [...row.children].forEach((cell,i)=>{
+      if (i === 0 || i >= row.children.length - 3) return;
+
+      if (!columnMode) {
+        cell.style.display = "";
+      } else {
+        cell.style.display = hidden.includes(i) ? "none" : "";
+      }
+    });
+  });
+}
+
+// ==========================
+// チェック保存
+// ==========================
+document.addEventListener("change", e=>{
+  if(!e.target.dataset.col) return;
+
+  const col = Number(e.target.dataset.col);
+  let hidden = getHiddenCols();
+
+  if (e.target.checked) {
+    hidden = hidden.filter(x => x !== col);
+  } else {
+    hidden.push(col);
+  }
+
+  localStorage.setItem("hiddenCols", JSON.stringify(hidden));
+});
+
+// ==========================
+// モーダル
+// ==========================
+window.openModal = () => document.getElementById("modal").style.display="block";
+window.closeModal = () => document.getElementById("modal").style.display="none";
 
 window.openColumnModal = () => {
-  document.getElementById("columnModal").style.display = "block";
+  document.getElementById("columnModal").style.display="block";
+  syncCheckbox();
 };
 
 window.closeColumnModal = () => {
-  document.getElementById("columnModal").style.display = "none";
+  document.getElementById("columnModal").style.display="none";
 };
 
-// 背景クリックでも閉じる
-window.onclick = e => {
-  if (e.target.id === "modal") closeModal();
-  if (e.target.id === "columnModal") closeColumnModal();
-};
+function syncCheckbox(){
+  const hidden = getHiddenCols();
+  document.querySelectorAll("[data-col]").forEach(cb=>{
+    cb.checked = !hidden.includes(Number(cb.dataset.col));
+  });
+}
 
-// =========================
-// その他
-// =========================
-window.toggleTools = () => {
-  const el = document.getElementById("tools");
-  el.style.display = el.style.display === "block" ? "none" : "block";
-};
-
-window.toggleDetails = () => {
-  useColumnFilter = !useColumnFilter;
-  render();
+// ==========================
+// CSV・削除
+// ==========================
+window.resetAll = async () => {
+  if(!confirm("全削除？")) return;
+  const snap = await getDocs(colRef);
+  snap.forEach(d => deleteDoc(doc(db,"items",d.id)));
 };
