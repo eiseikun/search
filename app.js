@@ -276,3 +276,57 @@ window.resetAll = async () => {
 
   alert("全削除完了");
 };
+/* モーダル */
+window.openModal = () => {
+  document.getElementById("modal").style.display = "block";
+};
+
+window.closeModal = () => {
+  document.getElementById("modal").style.display = "none";
+};
+
+window.openColumnModal = () => {
+  document.getElementById("columnModal").style.display = "block";
+  applyCheckboxState();
+};
+
+window.closeColumnModal = () => {
+  document.getElementById("columnModal").style.display = "none";
+};
+let showDetails = true;
+let useColumnFilter = false;
+
+window.toggleDetails = () => {
+  useColumnFilter = !useColumnFilter;
+  showDetails = !showDetails;
+  render();
+};
+function applyColumnVisibility(){
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols") || "[]");
+
+  document.querySelectorAll("table tr").forEach(row=>{
+    const cells = row.children;
+
+    for (let i = 0; i < cells.length; i++){
+      if (i === 0) continue;
+      if (i >= cells.length - 3) continue;
+
+      cells[i].style.display = hidden.includes(i) ? "none" : "";
+    }
+  });
+}
+
+function showAllColumns(){
+  document.querySelectorAll("table tr").forEach(row=>{
+    Array.from(row.children).forEach(cell=>{
+      cell.style.display = "";
+    });
+  });
+}
+
+function applyCheckboxState(){
+  const hidden = JSON.parse(localStorage.getItem("hiddenCols")||"[]");
+  document.querySelectorAll("[data-col]").forEach(cb=>{
+    cb.checked = !hidden.includes(Number(cb.dataset.col));
+  });
+}
