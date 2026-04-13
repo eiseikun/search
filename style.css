@@ -1,4 +1,3 @@
-/* ===== 全体 ===== */
 body {
   font-family: sans-serif;
   background: #eef1f5;
@@ -11,10 +10,7 @@ h1 {
   font-size: 18px;
 }
 
-/* ===== 検索バー ===== */
 .search-bar {
-  max-width: 1100px;
-  margin: 0 auto 10px;
   display: flex;
   gap: 6px;
   background: white;
@@ -25,37 +21,10 @@ h1 {
 .search-bar input {
   flex: 1;
   padding: 6px;
-  font-size: 14px;
 }
 
-/* ===== 件数 ===== */
-.result-bar {
-  max-width: 1100px;
-  margin: 0 auto 10px;
-  text-align: right;
-  color: #666;
-  font-size: 12px;
-}
-
-/* ===== ボタン ===== */
-button {
-  background: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 8px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #357abd;
-}
-
-/* ===== テーブル ===== */
+/* テーブル */
 .table-wrap {
-  max-width: 1100px;
-  margin: auto;
   overflow-x: auto;
 }
 
@@ -63,101 +32,54 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* スマホで横スクロール防止 */
-@media (max-width: 768px){
-  table {
-    min-width: unset;
-  }
-}
-
-th {
-  background: #222;
-  color: white;
-  cursor: pointer;
-  font-size: 12px;
 }
 
 td, th {
   padding: 6px;
   text-align: center;
   border-bottom: 1px solid #ddd;
-  vertical-align: middle;
 }
 
-/* ===== 全列：1行固定 ===== */
+/* 全部1行 */
 td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ===== 列幅バランス ===== */
-td:nth-child(1) { width: 40px; }   /* No */
-td:nth-child(2) { width: 50px; }   /* 大 */
-td:nth-child(3) { width: 90px; }   /* パッケージ */
-td:nth-child(4) { width: 50px; }   /* 小 */
-td:nth-child(5) { width: 100px; }  /* 名前 */
-td:nth-child(6) { width: 160px; }  /* 作品 */
-td:nth-child(7) { width: 70px; }   /* ボリューム */
-td:nth-child(8) { width: 60px; }   /* URL */
-
-td:nth-child(9),
-td:nth-child(10),
-td:nth-child(11),
-td:nth-child(12),
-td:nth-child(13) {
-  width: 60px;
-}
-
-/* 操作ボタン */
-td:nth-last-child(1),
-td:nth-last-child(2),
-td:nth-last-child(3) {
-  width: 60px;
-}
-
-/* ===== 作品だけ2行表示（ズレない版） ===== */
+/* 作品だけ2行 */
 .work-text {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   white-space: normal;
-  line-height: 1.2;
 }
 
-/* ===== URLコンパクト化 ===== */
+/* 列幅 */
+td:nth-child(1){width:40px;}
+td:nth-child(5){width:100px;}
+td:nth-child(6){width:160px;}
+
+/* URL */
 td:nth-child(8) a {
   font-size: 0;
 }
-
 td:nth-child(8) a::after {
   content: "🔗";
   font-size: 14px;
 }
 
-/* ===== ⭐強調 ===== */
-td:nth-child(9) {
-  color: #f39c12;
-  font-weight: bold;
+/* ⭐ */
+td:nth-child(9){
+  color:#f39c12;
+  font-weight:bold;
 }
 
-/* ===== ホバー ===== */
-tr:hover {
-  background: #f5f7fa;
-}
-
-/* ===== モーダル ===== */
+/* モーダル */
 .modal {
   display: none;
   position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.5);
@@ -169,20 +91,9 @@ tr:hover {
   padding: 20px;
   width: 90%;
   max-width: 500px;
-  border-radius: 12px;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
-.close {
-  float: right;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-/* ===== 列設定 ===== */
 .column-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
 }
