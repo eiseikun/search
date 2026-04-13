@@ -126,6 +126,20 @@ window.render = function(){
   document.getElementById("list").innerHTML = html;
 
   applyColumnVisibility();
+  document.querySelectorAll("th").forEach(th => {
+  th.style.background = "";
+});
+
+const headers = document.querySelectorAll("th");
+const indexMap = {
+  no:0, main:1, package:2, sub:3,
+  name:4, work:5, place:6, url:7,
+  fav:8, ratingCount:9, siteRating:10, date:11
+};
+
+if (indexMap[currentSort] !== undefined) {
+  headers[indexMap[currentSort]].style.background = "#dfefff";
+}
 };
 
 // ==========================
@@ -209,3 +223,58 @@ window.resetAll = async () => {
   const snap = await getDocs(colRef);
   snap.forEach(d => deleteDoc(doc(db,"items",d.id)));
 };
+
+// ==============================
+// 🔀 ソート状態
+// ==============================
+let currentSort = "no";
+let sortAsc = true;
+
+// ==============================
+// 🔀 ソート関数（全項目対応）
+// ==============================
+window.sortBy = (key) => {
+
+  if (currentSort === key) {
+    sortAsc = !sortAsc; // 同じ列ならトグル
+  } else {
+    currentSort = key;
+    sortAsc = true;
+  }
+
+  render();
+};
+data.sort((a,b)=>{
+
+  let A = a[currentSort];
+  let B = b[currentSort];
+
+  // =========================
+  // 数値ソート
+  // =========================
+  const numA = Number(A);
+  const numB = Number(B);
+
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) {
+    return sortAsc ? numA - numB : numB - numA;
+  }
+
+  // =========================
+  // 日付ソート（日本形式対応）
+  // =========================
+  if (currentSort === "date") {
+    const dA = new Date(A);
+    const dB = new Date(B);
+
+    return sortAsc ? dA - dB : dB - dA;
+  }
+
+  // =========================
+  // 文字列ソート
+  // =========================
+  return sortAsc
+    ? String(A).localeCompare(String(B), 'ja', { numeric: true })
+    : String(B).localeCompare(String(A), 'ja', { numeric: true });
+});
