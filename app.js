@@ -191,7 +191,10 @@ window.render = function(){
 <td>${d.main}</td>
 <td>${d.package||""}</td>
 <td>${d.sub}</td>
-<td><div class="name-text">${d.name}</div></td>
+<td><div class="name-text" onclick="openNameModal('${d.name}')">
+    ${d.name}
+  </div>
+</td>
 <td><div class="work-text">${d.work}</div></td>
 <td>${d.place||"-"}</td>
 <td>${d.url?`<a href="${d.url}" target="_blank">リンク</a>`:"-"}</td>
@@ -399,3 +402,14 @@ document.addEventListener("change", e=>{
 
   localStorage.setItem("hiddenCols", JSON.stringify(hidden));
 });
+/* ==============================
+   👤 名前クリック表示
+============================== */
+window.openNameModal = (text) => {
+  document.getElementById("nameModalText").textContent = text;
+  document.getElementById("nameModal").style.display = "block";
+};
+
+window.closeNameModal = () => {
+  document.getElementById("nameModal").style.display = "none";
+};
