@@ -92,29 +92,61 @@ window.render = function(){
     )
   );
 
-  // ===== ソート =====
-  data = data.sort((a,b)=>{
+ // ===== ソート =====
+data = data.sort((a, b) => {
 
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
+  // =========================
+  // 👤 名前：出現回数ソート（多い順）
+  // =========================
+  if (currentSort === "name") {
 
-    const numA = Number(A);
-    const numB = Number(B);
-    const isNum = !isNaN(numA) && !isNaN(numB);
+    // 出現回数カウント
+    const nameCount = {};
+    data.forEach(d => {
+      const n = d.name || "";
+      nameCount[n] = (nameCount[n] || 0) + 1;
+    });
 
-    if (isNum) return sortAsc ? numA - numB : numB - numA;
+    const countA = nameCount[a.name || ""] || 0;
+    const countB = nameCount[b.name || ""] || 0;
 
-    if (currentSort === "date") {
+    // 🔥 多い順が基本
+    if (countA !== countB) {
       return sortAsc
-        ? new Date(A) - new Date(B)
-        : new Date(B) - new Date(A);
+        ? countB - countA   // 多い→少ない
+        : countA - countB;  // 少ない→多い
     }
 
+    // 同じ件数なら名前順
     return sortAsc
-      ? String(A).localeCompare(String(B),"ja",{numeric:true})
-      : String(B).localeCompare(String(A),"ja",{numeric:true});
-  });
+      ? String(a.name).localeCompare(String(b.name), "ja", { numeric: true })
+      : String(b.name).localeCompare(String(a.name), "ja", { numeric: true });
+  }
 
+  // =========================
+  // 通常ソート
+  // =========================
+  let A = a[currentSort] ?? "";
+  let B = b[currentSort] ?? "";
+
+  const numA = Number(A);
+  const numB = Number(B);
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) {
+    return sortAsc ? numA - numB : numB - numA;
+  }
+
+  if (currentSort === "date") {
+    return sortAsc
+      ? new Date(A) - new Date(B)
+      : new Date(B) - new Date(A);
+  }
+
+  return sortAsc
+    ? String(A).localeCompare(String(B), "ja", { numeric: true })
+    : String(B).localeCompare(String(A), "ja", { numeric: true });
+});
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
   let html = "";
