@@ -44,6 +44,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: white;
+　table-layout: fixed;
 }
 
 th, td {
@@ -84,8 +85,10 @@ td:nth-child(1){
 }
 
 /* 名前 */
-td:nth-child(5){
+td:nth-child(5),
+th:nth-child(5){
   width: 100px;
+  max-width: 100px;
 }
 
 /* 作品 */
