@@ -4,32 +4,59 @@
 <meta charset="UTF-8">
 <title>作品管理</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
 <script type="module" src="app.js"></script>
 </head>
 
 <body>
 
+<!-- ==============================
+  📚 タイトル
+============================== -->
 <h1>📚 作品管理</h1>
 
+
+<!-- ==============================
+  🔍 検索バー + 操作
+============================== -->
 <div class="search-bar">
   <input id="search" placeholder="🔍 検索..." oninput="render()">
+
   <button onclick="toggleDetails()">選択列のみ</button>
   <button onclick="openColumnModal()">⚙️</button>
   <button onclick="openModal()">＋追加</button>
+
+  <!-- 🔥 CSV表示トグル -->
+  <button onclick="toggleCSV()">📂</button>
 </div>
-  
-<input type="file" id="csvFile" accept=".csv">
-<button id="csvBtn">CSV取込</button>
-  <button onclick="resetAll()" style="background:red;">全削除</button>
+
+
+<!-- ==============================
+  📂 CSV操作（通常は非表示）
+============================== -->
+<div id="csvArea">
+  <input type="file" id="csvFile" accept=".csv">
+  <button id="csvBtn">CSV取込</button>
+  <button onclick="resetAll()" class="danger">全削除</button>
+</div>
+
+
+<!-- ==============================
+  📊 件数表示
+============================== -->
 <div class="result-bar">
   <span id="resultCount"></span>
 </div>
 
-<!-- 列設定 -->
+
+<!-- ==============================
+  ⚙️ 列表示設定モーダル
+============================== -->
 <div id="columnModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeColumnModal()">&times;</span>
+
     <h3>列表示設定</h3>
 
     <div class="column-grid">
@@ -45,11 +72,13 @@
       <label><input type="checkbox" data-col="10">サイト</label>
       <label><input type="checkbox" data-col="11">更新日</label>
     </div>
-
   </div>
 </div>
 
-<!-- モーダル -->
+
+<!-- ==============================
+  ➕ 追加モーダル
+============================== -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
@@ -72,6 +101,10 @@
   </div>
 </div>
 
+
+<!-- ==============================
+  📊 テーブル
+============================== -->
 <div class="table-wrap">
 <table>
 <thead>
@@ -80,19 +113,14 @@
   <th onclick="sortBy('main')">大</th>
   <th onclick="sortBy('package')">パッケージ</th>
   <th onclick="sortBy('sub')">小</th>
-
   <th onclick="sortBy('name')">名前</th>
   <th onclick="sortBy('work')">作品</th>
-
   <th onclick="sortBy('place')">部分</th>
   <th onclick="sortBy('url')">URL</th>
-
   <th onclick="sortBy('fav')">⭐</th>
   <th onclick="sortBy('ratingCount')">評価数</th>
   <th onclick="sortBy('siteRating')">サイト</th>
-
   <th onclick="sortBy('date')">更新日</th>
-
   <th>更新</th>
   <th>編集</th>
   <th>削除</th>
@@ -102,12 +130,6 @@
 <tbody id="list"></tbody>
 </table>
 </div>
-<!-- 名前表示モーダル -->
-<div id="nameModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeNameModal()">&times;</span>
-    <div id="nameModalText" style="word-break: break-word;"></div>
-  </div>
-</div>
+
 </body>
 </html>
