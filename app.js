@@ -148,15 +148,13 @@ window.render = function(){
 
 
 
-
 window.importCSV = async () => {
   const file = document.getElementById("csvFile").files[0];
   if (!file) return alert("ファイル選択して");
 
   const text = await file.text();
-  const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
 
-  // 1行目はヘッダー
   const headers = lines[0].split(",");
 
   let maxNo = 0;
@@ -164,13 +162,19 @@ window.importCSV = async () => {
     if (d.no && d.no > maxNo) maxNo = d.no;
   });
 
+  let count = 0;
+
   for (let i = 1; i < lines.length; i++){
-    const values = lines[i].split(",");
+
+    const values = parseCSVLine(lines[i]);
 
     const obj = {};
     headers.forEach((h, j) => {
-      obj[h] = values[j];
+      obj[h] = values[j] || "";
     });
+
+    // 🔥 ここログ確認
+    console.log(obj);
 
     const data = {
       no: ++maxNo,
@@ -180,7 +184,10 @@ window.importCSV = async () => {
       sub: obj.sub,
       name: obj.name,
       work: obj.work,
-      volume: obj.volume,
+
+      // 🔥 修正（ここ重要）
+      place: obj.place,
+
       url: obj.url,
       fav: Number(obj.fav) || 0,
       ratingCount: Number(obj.ratingCount) || 0,
@@ -188,8 +195,17 @@ window.importCSV = async () => {
       date: new Date().toLocaleDateString()
     };
 
+    // 🔥 念のためチェック
+    if (!data.name || !data.work){
+      console.log("スキップ:", obj);
+      continue;
+    }
+
     await addDoc(colRef, data);
+    count++;
+
+    await new Promise(r => setTimeout(r, 30));
   }
 
-  alert("CSV取り込み完了！");
+  alert(`CSV取り込み完了：${count}件`);
 };
