@@ -209,3 +209,24 @@ window.importCSV = async () => {
 
   alert(`CSV取り込み完了：${count}件`);
 };
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++){
+    const char = line[i];
+
+    if (char === '"'){
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes){
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current);
+  return result;
+}
