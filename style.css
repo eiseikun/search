@@ -1,7 +1,12 @@
+/* ==============================
+   🧱 基本設定（全体）
+============================== */
 body {
   font-family: sans-serif;
   background: #eef1f5;
   padding: 10px;
+
+  /* 🔥 スマホ用に小さめ */
   font-size: 13px;
 }
 
@@ -10,6 +15,10 @@ h1 {
   font-size: 18px;
 }
 
+
+/* ==============================
+   🔍 検索バー
+============================== */
 .search-bar {
   display: flex;
   gap: 6px;
@@ -23,9 +32,12 @@ h1 {
   padding: 6px;
 }
 
-/* テーブル */
+
+/* ==============================
+   📊 テーブル全体
+============================== */
 .table-wrap {
-  overflow-x: auto;
+  overflow-x: auto; /* 横スクロール */
 }
 
 table {
@@ -34,66 +46,115 @@ table {
   background: white;
 }
 
-td, th {
+th, td {
   padding: 6px;
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
 
-/* 全部1行 */
+
+/* ==============================
+   📏 行表示制御（重要）
+============================== */
+
+/* 🔥 基本：1行に収める */
 td {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 作品だけ2行 */
+/* 🔥 作品だけ2行OK */
 .work-text {
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 2;       /* ← 行数制限 */
   -webkit-box-orient: vertical;
   overflow: hidden;
   white-space: normal;
 }
 
-/* 列幅 */
-td:nth-child(1){width:40px;}
-td:nth-child(5){width:100px;}
-td:nth-child(6){width:160px;}
 
-/* URL */
+/* ==============================
+   📐 列幅調整（ここで見やすさ決まる）
+============================== */
+
+/* No */
+td:nth-child(1){
+  width: 40px;
+}
+
+/* 名前 */
+td:nth-child(5){
+  width: 100px;
+}
+
+/* 作品 */
+td:nth-child(6){
+  width: 160px;
+}
+
+
+/* ==============================
+   🔗 URL表示（アイコン化）
+============================== */
+
+/* 元の文字を消す */
 td:nth-child(8) a {
   font-size: 0;
 }
+
+/* アイコン表示 */
 td:nth-child(8) a::after {
   content: "🔗";
   font-size: 14px;
 }
 
-/* ⭐ */
+
+/* ==============================
+   ⭐ お気に入り強調
+============================== */
 td:nth-child(9){
-  color:#f39c12;
-  font-weight:bold;
+  color: #f39c12;
+  font-weight: bold;
 }
 
-/* モーダル */
+
+/* ==============================
+   🪟 モーダル（ポップアップ）
+============================== */
 .modal {
   display: none;
   position: fixed;
+  top: 0;
+  left: 0;
+
   width: 100%;
   height: 100%;
+
   background: rgba(0,0,0,0.5);
 }
 
+/* 中身 */
 .modal-content {
   background: white;
   margin: 10% auto;
   padding: 20px;
+
   width: 90%;
   max-width: 500px;
+
+  border-radius: 10px;
 }
 
+
+/* ==============================
+   ⚙️ 列設定グリッド
+============================== */
 .column-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+  /* 🔥 スマホでも見やすい3列 */
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
 }
