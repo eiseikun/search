@@ -191,7 +191,7 @@ window.render = function(){
 <td>${d.main}</td>
 <td>${d.package||""}</td>
 <td>${d.sub}</td>
-<td><div class="name-text" onclick="openNameModal('${d.name}')">
+<td><div class="name-text" onclick="toggleName(this)">
     ${d.name}
   </div>
 </td>
@@ -408,6 +408,12 @@ document.addEventListener("change", e=>{
 window.openNameModal = (text) => {
   document.getElementById("nameModalText").textContent = text;
   document.getElementById("nameModal").style.display = "block";
+};
+/* ==============================
+   👤 名前 展開トグル
+============================== */
+window.toggleName = (el) => {
+  el.classList.toggle("expanded");
 };
 
 window.closeNameModal = () => {
