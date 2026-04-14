@@ -121,12 +121,25 @@ td:nth-last-child(-n+3) {
 /* ===== 管理ボタン ===== */
 .header-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* ← 右端へ */
   align-items: center;
-  margin-bottom: 10px;
 }
+
+/* ⚙️を“ボタンっぽくしない” */
 #manageBtn {
-  padding: 6px 10px;
-  font-size: 12px;
-  border-radius: 6px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* 押したときの変な枠消す */
+#manageBtn:focus {
+  outline: none;
+}
+
+/* PC用ちょい演出 */
+#manageBtn:hover {
+  opacity: 0.7;
 }
