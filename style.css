@@ -5,68 +5,116 @@ body {
   padding: 10px;
 }
 
+/* ===== 検索バー ===== */
 .search-bar {
-  display:flex;
-  gap:6px;
-  background:white;
-  padding:8px;
-  border-radius:10px;
+  display: flex;
+  gap: 6px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
+  flex-wrap: wrap; /* ← スマホで折り返す */
 }
 
+/* ===== テーブルラップ（横スクロール） ===== */
 .table-wrap {
-  overflow-x:auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* ===== テーブル本体 ===== */
 table {
-  width:100%;
-  border-collapse:collapse;
-  background:white;
-  table-layout:fixed;
+  width: max-content; /* ← 横に広がる */
+  border-collapse: collapse;
+  background: white;
+  table-layout: auto; /* ← 固定レイアウト解除 */
 }
 
-th,td {
-  padding:6px;
-  text-align:center;
-  border-bottom:1px solid #ddd;
+/* ===== セル共通 ===== */
+th, td {
+  padding: 6px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  min-width: 90px; /* ← 最低幅 */
 }
 
+/* ===== 省略表示 ===== */
 td {
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.modal {
-  display:none;
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-}
-
-.modal-content {
-  background:white;
-  margin:10% auto;
-  padding:20px;
-  width:90%;
-  max-width:500px;
-  border-radius:10px;
-}
-
-.column-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-.name-cell {
-  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ===== 名前クリックで展開 ===== */
+.name-cell {
+  min-width: 140px;
+  max-width: 220px;
   cursor: pointer;
 }
 
 .name-cell.expanded {
   white-space: normal;
   overflow: visible;
+}
+
+/* ===== 重要列サイズ調整 ===== */
+th:nth-child(1), td:nth-child(1) { min-width: 50px; }   /* No */
+th:nth-child(2), td:nth-child(2) { min-width: 70px; }   /* 大 */
+th:nth-child(4), td:nth-child(4) { min-width: 80px; }   /* 小 */
+th:nth-child(5), td:nth-child(5) { min-width: 160px; }  /* 名前 */
+th:nth-child(6), td:nth-child(6) { min-width: 160px; }  /* 作品 */
+th:nth-child(8), td:nth-child(8) { min-width: 70px; }   /* URL */
+
+/* ===== ボタン列（狭く） ===== */
+th:nth-last-child(-n+3),
+td:nth-last-child(-n+3) {
+  min-width: 60px;
+}
+
+/* ===== モーダル ===== */
+.modal {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+}
+
+/* ===== 列設定 ===== */
+.column-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+}
+
+/* ===== スマホ最適化 ===== */
+@media (max-width: 600px) {
+
+  body {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 4px;
+    min-width: 80px;
+  }
+
+  /* 名前・作品はスマホでも見やすく */
+  th:nth-child(5), td:nth-child(5),
+  th:nth-child(6), td:nth-child(6) {
+    min-width: 140px;
+  }
+
+  /* モーダルを上寄せ */
+  .modal-content {
+    margin: 20% auto;
+  }
 }
