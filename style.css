@@ -19,7 +19,7 @@ body {
 .table-wrap {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: 70dvh;
+  height: calc(100dvh - 120px);
   -webkit-overflow-scrolling: touch;
 }
 
