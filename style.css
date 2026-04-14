@@ -161,3 +161,7 @@ th {
   background: white;
   z-index: 2;
 }
+/* ===== おまけ ===== */
+tr.active-row {
+  background: #e6f2ff;
+}
