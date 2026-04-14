@@ -25,7 +25,11 @@
 </div>
 
 <!-- ================= 管理 ================= -->
-<div style="margin:8px 0;">
+<!-- トグルボタン -->
+<button onclick="toggleManage()" id="manageBtn">管理メニュー</button>
+
+<!-- 管理エリア -->
+<div id="manageArea" style="margin:8px 0; display:none;">
   <input type="file" id="csvFile">
   <button onclick="importCSV()">CSV取込</button>
   <button onclick="resetAll()" style="background:red;color:white;">全削除</button>
