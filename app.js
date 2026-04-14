@@ -188,15 +188,13 @@ data = data.sort((a, b) => {
 
   document.getElementById("list").innerHTML = html;
 // 触れたところが分かる
-document.querySelectorAll("tbody tr").forEach(row => {
-  row.addEventListener("click", () => {
-
-    // 全部解除
-    document.querySelectorAll("tr").forEach(r => {
+document.querySelectorAll("#list tr").forEach(row => {
+  row.addEventListener("click", (e) => {
+    // ボタンやリンクは無視
+    if (e.target.tagName === "BUTTON" || e.target.tagName === "A") return;
+    document.querySelectorAll("#list tr").forEach(r => {
       r.classList.remove("active-row");
     });
-
-    // 押した行だけ
     row.classList.add("active-row");
   });
 });
