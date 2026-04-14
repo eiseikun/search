@@ -14,7 +14,7 @@ const app = initializeApp({
 const db = getFirestore(app);
 const colRef = collection(db, "items");
 
-// ================= 列定義（最重要） =================
+// ================= 列 =================
 const columns = [
   "no","main","package","sub","name","work",
   "place","url","fav","ratingCount","siteRating","date"
@@ -28,13 +28,12 @@ let columnMode = false;
 let currentSort = "no";
 let sortAsc = true;
 
-// ================= 列設定保存 =================
+// ================= localStorage =================
 function getHiddenCols(){
   return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
 }
-
-function saveHiddenCols(arr){
-  localStorage.setItem("hiddenCols", JSON.stringify(arr));
+function saveHiddenCols(v){
+  localStorage.setItem("hiddenCols", JSON.stringify(v));
 }
 
 // ================= Firestore =================
@@ -84,7 +83,7 @@ window.remove = async id => {
 // ================= 編集 =================
 window.startEdit = (id,...vals) => {
   openModal();
-  const keys = columns.slice(1,10); // 編集対象
+  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
   keys.forEach((k,i)=>{
     document.getElementById(k).value = vals[i] || "";
   });
@@ -102,9 +101,8 @@ window.render = function(){
     )
   );
 
-  // ================= ソート =================
+  // ソート
   data = data.sort((a,b)=>{
-
     let A = a[currentSort] ?? "";
     let B = b[currentSort] ?? "";
 
@@ -127,7 +125,6 @@ window.render = function(){
 
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
-  // ================= 表生成 =================
   let html = "";
 
   data.forEach(d=>{
@@ -153,6 +150,8 @@ window.render = function(){
   });
 
   document.getElementById("list").innerHTML = html;
+
+  applyColumnVisibility(); // ←超重要
 };
 
 // ================= ソート =================
@@ -163,16 +162,20 @@ window.sortBy = (key)=>{
 };
 
 // ================= モーダル =================
-window.openModal = ()=>document.getElementById("modal").style.display="block";
-window.closeModal = ()=>document.getElementById("modal").style.display="none";
+window.openModal = ()=>modal.style.display="block";
+window.closeModal = ()=>modal.style.display="none";
 
 // ================= 列表示 =================
-window.toggleDetails = ()=>{
+window.toggleDetails = () => {
   columnMode = !columnMode;
+
+  const btn = document.getElementById("viewBtn");
+  if (btn) btn.textContent = columnMode ? "一部表示" : "全表示";
+
   applyColumnVisibility();
 };
 
-// ================= 列表示制御 =================
+// ================= 列制御 =================
 window.applyColumnVisibility = () => {
 
   const hidden = getHiddenCols();
@@ -181,23 +184,22 @@ window.applyColumnVisibility = () => {
   rows.forEach(row=>{
     [...row.children].forEach((cell,i)=>{
 
-      if (i >= columns.length) return;
-
       if (!columnMode) {
         cell.style.display = "";
-      } else {
-        cell.style.display = hidden.includes(i) ? "none" : "";
+        return;
       }
+
+      cell.style.display = hidden.includes(i) ? "none" : "";
     });
   });
 };
 
-// ================= チェック操作 =================
+// ================= チェック =================
 document.addEventListener("change", e=>{
   if(!e.target.dataset.col) return;
 
-  const col = Number(e.target.dataset.col);
   let hidden = getHiddenCols();
+  const col = Number(e.target.dataset.col);
 
   if(e.target.checked){
     hidden = hidden.filter(x=>x!==col);
@@ -211,23 +213,24 @@ document.addEventListener("change", e=>{
 // ================= チェック同期 =================
 function syncCheckbox(){
   const hidden = getHiddenCols();
+
   document.querySelectorAll("[data-col]").forEach(cb=>{
     cb.checked = !hidden.includes(Number(cb.dataset.col));
   });
 }
 
 window.openColumnModal = ()=>{
-  document.getElementById("columnModal").style.display="block";
+  columnModal.style.display="block";
   syncCheckbox();
 };
 
 window.closeColumnModal = ()=>{
-  document.getElementById("columnModal").style.display="none";
+  columnModal.style.display="none";
 };
 
 // ================= CSV =================
 window.importCSV = async () => {
-  const file = document.getElementById("csvFile").files[0];
+  const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
 
   const text = await file.text();
@@ -263,9 +266,6 @@ window.importCSV = async () => {
 
   alert("CSV完了");
 };
-
-document.getElementById("csvBtn")
-  .addEventListener("click",importCSV);
 
 // ================= 更新日 =================
 window.updateDate = async id=>{
