@@ -251,6 +251,8 @@ document.addEventListener("change", e=>{
   }
 
   saveHiddenCols(hidden);
+  // 🔥 追加（即反映）
+  applyColumnVisibility();
 });
 
 // ================= チェック同期 =================
