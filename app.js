@@ -100,29 +100,60 @@ window.render = function(){
       String(v).toLowerCase().includes(keyword)
     )
   );
+// ソート
+data = data.sort((a, b) => {
 
-  // ソート
-  data = data.sort((a,b)=>{
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
+  // =========================
+  // 👤 名前ソート（出現回数順）
+  // =========================
+  if (currentSort === "name") {
 
-    const numA = Number(A);
-    const numB = Number(B);
-    const isNum = !isNaN(numA) && !isNaN(numB);
+    const countMap = {};
 
-    if (isNum) return sortAsc ? numA - numB : numB - numA;
+    // 出現回数を事前計算
+    lastSnapshot.forEach(d => {
+      const n = d.name || "";
+      countMap[n] = (countMap[n] || 0) + 1;
+    });
 
-    if (currentSort === "date") {
+    const countA = countMap[a.name || ""] || 0;
+    const countB = countMap[b.name || ""] || 0;
+
+    // 多い順が基本
+    if (countA !== countB) {
       return sortAsc
-        ? new Date(A) - new Date(B)
-        : new Date(B) - new Date(A);
+        ? countB - countA   // 多い → 少ない
+        : countA - countB;  // 少ない → 多い
     }
 
-    return sortAsc
-      ? String(A).localeCompare(String(B),"ja",{numeric:true})
-      : String(B).localeCompare(String(A),"ja",{numeric:true});
-  });
+    // 同数なら名前順で安定化
+    return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
+  }
 
+  // =========================
+  // 通常ソート
+  // =========================
+  let A = a[currentSort] ?? "";
+  let B = b[currentSort] ?? "";
+
+  const numA = Number(A);
+  const numB = Number(B);
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) {
+    return sortAsc ? numA - numB : numB - numA;
+  }
+
+  if (currentSort === "date") {
+    return sortAsc
+      ? new Date(A) - new Date(B)
+      : new Date(B) - new Date(A);
+  }
+
+  return sortAsc
+    ? String(A).localeCompare(String(B), "ja", { numeric: true })
+    : String(B).localeCompare(String(A), "ja", { numeric: true });
+});
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
   let html = "";
