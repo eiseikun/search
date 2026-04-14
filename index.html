@@ -10,7 +10,11 @@
 
 <body>
 
-<h1>📚 作品管理</h1>
+<div class="header-bar">
+  <h1>📚 作品管理</h1>
+  <button onclick="toggleManage()" id="manageBtn">⚙️</button>
+</div>
+
 
 <!-- ================= 検索 ================= -->
 <div class="search-bar">
@@ -23,10 +27,6 @@
   <button onclick="openColumnModal()">🖋列表示設定</button>
   <button onclick="openModal()">＋追加</button>
 </div>
-
-<!-- ================= 管理 ================= -->
-<!-- トグルボタン -->
-<button onclick="toggleManage()" id="manageBtn">管理メニュー</button>
 
 <!-- 管理エリア -->
 <div id="manageArea" style="margin:8px 0; display:none;">
