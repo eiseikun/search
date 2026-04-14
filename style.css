@@ -58,3 +58,15 @@ td {
   grid-template-columns:repeat(3,1fr);
   gap:10px;
 }
+.name-cell {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.name-cell.expanded {
+  white-space: normal;
+  overflow: visible;
+}
