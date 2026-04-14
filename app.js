@@ -325,3 +325,13 @@ window.updateDate = async id=>{
 window.toggleName = (el) => {
   el.classList.toggle("expanded");
 };
+// ================= 管理メニュー =================
+window.toggleManage = () => {
+  const area = document.getElementById("manageArea");
+  const btn = document.getElementById("manageBtn");
+
+  const isOpen = area.style.display === "block";
+
+  area.style.display = isOpen ? "none" : "block";
+  btn.textContent = isOpen ? "管理メニュー" : "閉じる";
+};
