@@ -333,5 +333,5 @@ window.toggleManage = () => {
   const isOpen = area.style.display === "block";
 
   area.style.display = isOpen ? "none" : "block";
-  btn.textContent = isOpen ? "管理メニュー" : "閉じる";
+  btn.textContent = isOpen ? "⚙️" : "閉じる";
 };
