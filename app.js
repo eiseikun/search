@@ -349,3 +349,17 @@ window.toggleManage = () => {
   area.style.display = isOpen ? "none" : "block";
   btn.textContent = isOpen ? "⚙️" : "閉じる";
 };
+
+// ================= 触れたところ分かる =================
+document.querySelectorAll("tbody tr").forEach(row => {
+  row.addEventListener("click", () => {
+
+    // 全部解除
+    document.querySelectorAll("tr").forEach(r => {
+      r.classList.remove("active-row");
+    });
+
+    // 押した行だけ
+    row.classList.add("active-row");
+  });
+});
