@@ -21,6 +21,7 @@ body {
   overflow-y: auto;
   height: calc(100dvh - 120px);
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* ===== テーブル本体 ===== */
