@@ -165,7 +165,9 @@ data = data.sort((a, b) => {
 <td>${d.main}</td>
 <td>${d.package||""}</td>
 <td>${d.sub}</td>
-<td>${d.name}</td>
+<td class="name-cell" onclick="toggleName(this)">
+  ${d.name || ""}
+</td>
 <td>${d.work}</td>
 <td>${d.place||"-"}</td>
 <td>${d.url ? "🔗" : "-"}</td>
@@ -318,4 +320,8 @@ window.updateDate = async id=>{
   await updateDoc(doc(db,"items",id),{
     date:new Date().toLocaleDateString()
   });
+};
+// ================= 名前全表示 =================
+window.toggleName = (el) => {
+  el.classList.toggle("expanded");
 };
