@@ -219,11 +219,19 @@ window.applyColumnVisibility = () => {
   rows.forEach(row=>{
     [...row.children].forEach((cell,i)=>{
 
+      // 全表示モード
       if (!columnMode) {
         cell.style.display = "";
         return;
       }
 
+      // 🔥 追加：操作列は強制非表示
+      if (i === 12 || i === 13 || i === 14) {
+        cell.style.display = "none";
+        return;
+      }
+
+      // 通常の列制御
       cell.style.display = hidden.includes(i) ? "none" : "";
     });
   });
