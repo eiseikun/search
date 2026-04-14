@@ -151,7 +151,7 @@ window.render = function(){
 
   document.getElementById("list").innerHTML = html;
 
-  applyColumnVisibility(); // ←超重要
+  applyColumnVisibility();
 };
 
 // ================= ソート =================
@@ -170,7 +170,9 @@ window.toggleDetails = () => {
   columnMode = !columnMode;
 
   const btn = document.getElementById("viewBtn");
-  if (btn) btn.textContent = columnMode ? "一部表示" : "全表示";
+  if (btn) {
+    btn.textContent = columnMode ? "詳細表示" : "全表示";
+  }
 
   applyColumnVisibility();
 };
@@ -228,7 +230,7 @@ window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
 
-// ================= CSV =================
+// ================= CSV（修正なし・正常動作維持） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
@@ -265,6 +267,19 @@ window.importCSV = async () => {
   }
 
   alert("CSV完了");
+};
+
+// ================= 全削除（完全修正版） =================
+window.resetAll = async () => {
+  if (!confirm("全削除？")) return;
+
+  const snap = await getDocs(colRef);
+
+  await Promise.all(
+    snap.docs.map(d =>
+      deleteDoc(doc(db, "items", d.id))
+    )
+  );
 };
 
 // ================= 更新日 =================
