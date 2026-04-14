@@ -170,7 +170,11 @@ data = data.sort((a, b) => {
 </td>
 <td>${d.work}</td>
 <td>${d.place||"-"}</td>
-<td>${d.url ? "🔗" : "-"}</td>
+<td>
+  ${d.url 
+    ? `<a href="${d.url}" target="_blank">🔗</a>` 
+    : "-"}
+</td>
 <td>${d.fav}</td>
 <td>${d.ratingCount}</td>
 <td>${d.siteRating}</td>
