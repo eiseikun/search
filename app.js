@@ -62,7 +62,7 @@ window.addItem = async () => {
     date: new Date().toLocaleDateString()
   };
 
-  if (!data.name || !data.work) return alert("必須");
+  if (!data.main || !data.work) return alert("必須項目を入力してください");
 
   if (editId) {
     await updateDoc(doc(db,"items",editId), data);
