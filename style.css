@@ -17,10 +17,13 @@ body {
 
 /* ===== テーブルラップ（横スクロール） ===== */
 .table-wrap {
+  flex: 1; /* ← これが最重要 */
+
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100dvh - 120px);
-  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
