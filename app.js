@@ -287,13 +287,7 @@ window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
 
-// ================= CSV（完全差分 + 爆速Batch + 1000件対応） =================
-import {
-  writeBatch,
-  getDocs,
-  doc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+// ================= CSV（完全安定版） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
@@ -305,7 +299,7 @@ window.importCSV = async () => {
     skipEmptyLines: true
   });
 
-  // 🔥 最新データ取得
+  // 🔥 ここが超重要（最新データ取得）
   const snap = await getDocs(colRef);
   let localData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -313,13 +307,6 @@ window.importCSV = async () => {
 
   let updateCount = 0;
   let addCount = 0;
-  let skipCount = 0;
-
-  // 🔥 batch制御
-  const BATCH_SIZE = 500;
-  let batch = writeBatch(db);
-  let opCount = 0;
-  let batchPromises = [];
 
   for (const row of parsed.data) {
 
@@ -328,108 +315,59 @@ window.importCSV = async () => {
 
     if (!mainVal) continue;
 
-    // 🔥 既存判定
+    // 🔥 最新データで判定
     const existing = localData.find(d => {
+
       const dMain = Number(d.main);
       const dSub = (d.sub || "").trim();
 
-      if (subVal) return dMain === mainVal && dSub === subVal;
+      if (subVal) {
+        return dMain === mainVal && dSub === subVal;
+      }
       return dMain === mainVal && !dSub;
     });
 
     // 🔥 No制御
     let noVal = Number(row.no);
+
     if (existing) {
       noVal = existing.no;
     } else {
       noVal = noVal || ++maxNo;
     }
 
-    // 🔥 正規化（型・空白統一）
     const data = {
       no: noVal,
       main: mainVal,
-      package: (row.package || "").trim(),
+      package: row.package || "",
       sub: subVal,
-      name: (row.name || "").trim(),
-      work: (row.work || "").trim(),
-      place: (row.place || "").trim(),
-      url: (row.url || "").trim(),
+      name: row.name,
+      work: row.work,
+      place: row.place || "",
+      url: row.url || "",
       fav: Number(row.fav) || 0,
       ratingCount: Number(row.ratingCount) || 0,
       siteRating: Number(row.siteRating) || 0,
       date: new Date().toLocaleDateString()
     };
 
-    // =========================
-    // 🔥 完全差分チェック
-    // =========================
-    let isChanged = false;
-
-    if (!existing) {
-      isChanged = true;
-    } else {
-      isChanged =
-        existing.no !== data.no ||
-        Number(existing.main) !== data.main ||
-        (existing.package || "").trim() !== data.package ||
-        (existing.sub || "").trim() !== data.sub ||
-        (existing.name || "").trim() !== data.name ||
-        (existing.work || "").trim() !== data.work ||
-        (existing.place || "").trim() !== data.place ||
-        (existing.url || "").trim() !== data.url ||
-        Number(existing.fav) !== data.fav ||
-        Number(existing.ratingCount) !== data.ratingCount ||
-        Number(existing.siteRating) !== data.siteRating;
-    }
-
-    // 🔥 変更なしはスキップ（これが最重要）
-    if (!isChanged) {
-      skipCount++;
-      continue;
-    }
-
-    // =========================
-    // 🔥 書き込み（Batch）
-    // =========================
     if (existing) {
-      batch.update(doc(db, "items", existing.id), data);
+      await updateDoc(doc(db, "items", existing.id), data);
       updateCount++;
 
+      // 🔥 ローカル更新
       Object.assign(existing, data);
 
     } else {
-      const newRef = doc(colRef);
-      batch.set(newRef, data);
+      const docRef = await addDoc(colRef, data);
       addCount++;
 
-      localData.push({ id: newRef.id, ...data });
-    }
-
-    opCount++;
-
-    // 🔥 500件ごとにcommit
-    if (opCount === BATCH_SIZE) {
-      batchPromises.push(batch.commit());
-      batch = writeBatch(db);
-      opCount = 0;
+      // 🔥 ローカル追加
+      localData.push({ id: docRef.id, ...data });
     }
   }
 
-  // 🔥 残りcommit
-  if (opCount > 0) {
-    batchPromises.push(batch.commit());
-  }
-
-  // 🔥 全実行
-  await Promise.all(batchPromises);
-
-  alert(
-`CSV完了（差分のみ）
-追加: ${addCount}件
-更新: ${updateCount}件
-変更なし: ${skipCount}件`
-  );
+  alert(`CSV完了\n追加: ${addCount}件\n更新: ${updateCount}件`);
 };
 
 // ================= 全削除（完全修正版） =================
