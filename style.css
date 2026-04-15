@@ -20,6 +20,7 @@ body {
   overflow-x: auto;
   overflow-y: auto;
   height: calc(100dvh - 120px);
+  padding-bottom: 40px;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
