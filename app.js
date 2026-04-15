@@ -87,7 +87,25 @@ window.addItem = async () => {
 // ================= 削除 =================
 window.remove = async id => {
   if (!confirm("削除？")) return;
+  // 🔥 削除実行
   await deleteDoc(doc(db,"items",id));
+  // 🔥 最新データ取得
+  const snap = await getDocs(colRef);
+  let data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // 🔥 No順で並び替え
+  data.sort((a, b) => (a.no || 0) - (b.no || 0));
+  // 🔥 batchで詰める
+  const batch = writeBatch(db);
+  data.forEach((item, index) => {
+    const newNo = index + 1;
+
+    if (item.no !== newNo) {
+      const ref = doc(db, "items", item.id);
+      batch.update(ref, { no: newNo });
+    }
+  });
+
+  await batch.commit();
 };
 
 // ================= 編集 =================
