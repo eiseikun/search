@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, addDoc, deleteDoc, doc,
-  onSnapshot, updateDoc, getDocs
+  onSnapshot, updateDoc, getDocs, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ================= Firebase =================
@@ -87,21 +87,31 @@ window.addItem = async () => {
 // ================= 削除 =================
 window.remove = async id => {
   if (!confirm("削除？")) return;
+
+  // 🔥 削除対象取得
   const target = lastSnapshot.find(d => d.id === id);
   if (!target) return;
+
   const deletedNo = target.no;
-  await deleteDoc(doc(db,"items",id));
+
+  // 🔥 削除
+  await deleteDoc(doc(db, "items", id));
+
+  // 🔥 最新データ取り直し（超重要）
+  const snap = await getDocs(colRef);
+  const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
   const batch = writeBatch(db);
 
-  lastSnapshot.forEach(d => {
+  data.forEach(d => {
     if (d.no > deletedNo) {
       const ref = doc(db, "items", d.id);
       batch.update(ref, { no: d.no - 1 });
     }
   });
+
   await batch.commit();
 };
-
 // ================= 編集 =================
 window.startEdit = (id,...vals) => {
   openModal();
