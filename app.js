@@ -491,6 +491,10 @@ window.updateDate = async id=>{
 window.toggleName = (el) => {
   el.classList.toggle("expanded");
 };
+// ================= コメント全表示 =================
+window.toggleComment = (el) => {
+  el.classList.toggle("expanded");
+};
 // ================= 管理メニュー =================
 window.toggleManage = () => {
   const area = document.getElementById("manageArea");
