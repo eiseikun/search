@@ -401,7 +401,54 @@ window.importCSV = async () => {
 
   alert(`CSV完了\n追加: ${addCount}件\n更新: ${updateCount}件`);
 };
+// ================= CSV（出力） =================
+window.exportCSV = async () => {
 
+  // 🔥 最新データ取得
+  const snap = await getDocs(colRef);
+  const data = snap.docs.map(d => d.data());
+
+  if (data.length === 0) {
+    alert("データなし");
+    return;
+  }
+
+  // 🔥 ヘッダー
+  const headers = [
+    "no","main","package","sub","name","work",
+    "place","url","fav","ratingCount","siteRating","date"
+  ];
+
+  // 🔥 CSV生成
+  const csv = [
+    headers.join(","),
+
+    ...data.map(row =>
+      headers.map(h => {
+        let val = row[h] ?? "";
+
+        // 🔥 カンマ・改行対策
+        val = String(val).replace(/"/g, '""');
+        if (val.includes(",") || val.includes("\n")) {
+          val = `"${val}"`;
+        }
+
+        return val;
+      }).join(",")
+    )
+  ].join("\n");
+
+  // 🔥 ダウンロード
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "export.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
 // ================= 全削除（完全修正版） =================
 window.resetAll = async () => {
   if (!confirm("全削除？")) return;
