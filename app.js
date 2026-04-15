@@ -409,13 +409,12 @@ window.exportCSV = async () => {
 
   if (data.length === 0) return alert("データなし");
 
-  // 🔥 元CSVと完全一致ヘッダー
   const headers = [
     "main","package","sub","name","work",
     "place","url","fav","ratingCount","siteRating"
   ];
 
-  const csv = [
+  const csvBody = [
     headers.join(","),
 
     ...data.map(row =>
@@ -423,7 +422,7 @@ window.exportCSV = async () => {
 
         let val = row[h];
 
-        // 🔥 0を空に戻す（重要）
+        // 数値0 → 空に戻す
         if (
           (h === "fav" || h === "ratingCount" || h === "siteRating")
           && (val === 0 || val === "0")
@@ -431,7 +430,6 @@ window.exportCSV = async () => {
           val = "";
         }
 
-        // 🔥 undefined/null → 空
         if (val === undefined || val === null) val = "";
 
         val = String(val).replace(/"/g, '""');
@@ -446,7 +444,12 @@ window.exportCSV = async () => {
     )
   ].join("\n");
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  // 🔥 これが超重要（BOM追加）
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + csvBody], {
+    type: "text/csv;charset=utf-8;"
+  });
+
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
