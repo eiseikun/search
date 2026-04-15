@@ -17,7 +17,7 @@ const colRef = collection(db, "items");
 // ================= 列 =================
 const columns = [
   "no","main","package","sub","name","work",
-  "place","url","fav","ratingCount","siteRating","date"
+  "place","url","fav","ratingCount","siteRating","selfRating","comment","date"
 ];
 
 // ================= 状態 =================
@@ -64,6 +64,8 @@ window.addItem = async () => {
     fav: Number(v("fav")) || 0,
     ratingCount: Number(v("ratingCount")) || 0,
     siteRating: Number(v("siteRating")) || 0,
+    selfRating: Number(v("selfRating")) || 0,
+    comment: v("comment") || "",
     date: new Date().toLocaleDateString()
   };
 
@@ -115,7 +117,7 @@ window.remove = async id => {
 // ================= 編集 =================
 window.startEdit = (id,...vals) => {
   openModal();
-  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating"];
+  const keys = ["main","package","sub","name","work","place","url","fav","ratingCount","siteRating","selfRating","comment"];
   keys.forEach((k,i)=>{
     document.getElementById(k).value = vals[i] || "";
   });
@@ -215,7 +217,7 @@ data = data.sort((a, b) => {
 <td>${d.date}</td>
 
 <td><button onclick="updateDate('${d.id}')">更新</button></td>
-<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}')">編集</button></td>
+<td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.selfRating}','${d.comment}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
   });
@@ -274,7 +276,7 @@ window.applyColumnVisibility = () => {
       }
 
       // 🔥 追加：操作列は強制非表示
-      if (i === 12 || i === 13 || i === 14) {
+      if (i === 14 || i === 15 || i === 16) {
         cell.style.display = "none";
         return;
       }
@@ -382,6 +384,8 @@ window.importCSV = async () => {
       fav: Number(row.fav) || 0,
       ratingCount: Number(row.ratingCount) || 0,
       siteRating: Number(row.siteRating) || 0,
+      selfRating: Number(row.selfRating) || 0,
+      comment: row.comment || "",
       date: new Date().toLocaleDateString()
     };
 
@@ -416,7 +420,7 @@ window.exportCSV = async () => {
 
   const headers = [
     "main","package","sub","name","work",
-    "place","url","fav","ratingCount","siteRating"
+    "place","url","fav","ratingCount","siteRating","selfRating","comment"
   ];
 
   const csvBody = [
