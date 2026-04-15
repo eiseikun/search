@@ -20,12 +20,18 @@ body {
   overflow-x: auto;
   overflow-y: auto;
 
-  height: calc(100dvh - 90px);
+  height: calc(100dvh - 60px); /* ← さらに広げる */
 
-  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  padding-bottom: calc(140px + env(safe-area-inset-bottom));
 
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+.table-wrap::after {
+  content: "";
+  display: block;
+  height: calc(140px + env(safe-area-inset-bottom));
 }
 /* ===== テーブル本体 ===== */
 table {
