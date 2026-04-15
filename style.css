@@ -60,7 +60,22 @@ td {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+/* ===== コメントクリックで展開 ===== */
+.comment-cell {
+  min-width: 160px;
+  max-width: 220px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
+.comment-cell.expanded {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 /* ===== 重要列サイズ調整 ===== */
 th:nth-child(1), td:nth-child(1) { min-width: 50px; }   /* No */
 th:nth-child(2), td:nth-child(2) { min-width: 70px; }   /* 大 */
