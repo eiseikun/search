@@ -287,7 +287,7 @@ window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
 
-// ================= CSV（完全対応版） =================
+// ================= CSV（上書きモード：main + sub / mainのみ） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
@@ -295,19 +295,25 @@ window.importCSV = async () => {
   const text = await file.text();
 
   const parsed = Papa.parse(text, {
-    header: true,        // 1行目をヘッダー扱い
+    header: true,
     skipEmptyLines: true
   });
 
   let maxNo = Math.max(...lastSnapshot.map(d => d.no || 0), 0);
 
+  let updateCount = 0;
+  let addCount = 0;
+
   for (const row of parsed.data) {
+
+    const mainVal = Number(row.main);
+    const subVal = (row.sub || "").trim(); // ← 空白対策
 
     const data = {
       no: Number(row.no) || ++maxNo,
-      main: Number(row.main),
+      main: mainVal,
       package: row.package || "",
-      sub: row.sub || "",
+      sub: subVal,
       name: row.name,
       work: row.work,
       place: row.place || "",
@@ -318,15 +324,37 @@ window.importCSV = async () => {
       date: new Date().toLocaleDateString()
     };
 
-    // 必須チェック
-    if (!data.main || !data.work) continue;
+    // 必須（mainだけ必須）
+    if (!data.main) continue;
 
-    await addDoc(colRef, data);
+    // =========================
+    // 🔥 上書き判定
+    // =========================
+    const existing = lastSnapshot.find(d => {
+
+      const dMain = Number(d.main);
+      const dSub = (d.sub || "").trim();
+
+      // subあり → main + sub
+      if (subVal) {
+        return dMain === mainVal && dSub === subVal;
+      }
+
+      // subなし → mainのみ
+      return dMain === mainVal && (!dSub);
+    });
+
+    if (existing) {
+      await updateDoc(doc(db, "items", existing.id), data);
+      updateCount++;
+    } else {
+      await addDoc(colRef, data);
+      addCount++;
+    }
   }
 
-  alert("CSV完了");
+  alert(`CSV完了\n追加: ${addCount}件\n更新: ${updateCount}件`);
 };
-
 // ================= 全削除（完全修正版） =================
 window.resetAll = async () => {
   if (!confirm("全削除？")) return;
