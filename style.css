@@ -19,8 +19,8 @@ body {
 .table-wrap {
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100dvh - 120px);
-  padding-bottom: 40px;
+  max-height: calc(100dvh - 120px);
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
