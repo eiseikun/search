@@ -47,8 +47,13 @@ onSnapshot(colRef, snap => {
 window.addItem = async () => {
   const v = id => document.getElementById(id).value;
 
+  // 🔥 最新データ取得してmaxNo算出
+  const snap = await getDocs(colRef);
+  const dataList = snap.docs.map(d => d.data());
+  const maxNo = Math.max(...dataList.map(d => d.no || 0), 0);
+
   const data = {
-    no: 0,
+    no: maxNo + 1, // ← ここが重要
     main: Number(v("main")),
     package: v("package"),
     sub: v("sub"),
@@ -65,7 +70,12 @@ window.addItem = async () => {
   if (!data.main || !data.work) return alert("必須項目を入力してください");
 
   if (editId) {
+    // 🔥 編集時はNo維持
+    const existing = lastSnapshot.find(d => d.id === editId);
+    if (existing) data.no = existing.no;
+
     await updateDoc(doc(db,"items",editId), data);
+
   } else {
     await addDoc(colRef, data);
   }
