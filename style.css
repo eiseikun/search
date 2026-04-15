@@ -68,7 +68,7 @@ th:nth-child(4), td:nth-child(4) { min-width: 80px; }   /* 小 */
 th:nth-child(5), td:nth-child(5) { min-width: 160px; }  /* 名前 */
 th:nth-child(6), td:nth-child(6) { min-width: 160px; }  /* 作品 */
 th:nth-child(8), td:nth-child(8) { min-width: 70px; }   /* URL */
-td:nth-child(13), td:nth-child(13) { min-width: 160px; }   /* コメント */
+th:nth-child(13), td:nth-child(13) { min-width: 160px; }   /* コメント */
 
 /* ===== ボタン列（狭く） ===== */
 th:nth-last-child(-n+3),
