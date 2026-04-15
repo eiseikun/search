@@ -20,7 +20,7 @@ body {
   overflow-x: auto;
   overflow-y: auto;
 
-  height: calc(100dvh - 120px);
+  height: calc(100dvh - 90px);
 
   padding-bottom: calc(100px + env(safe-area-inset-bottom));
 
