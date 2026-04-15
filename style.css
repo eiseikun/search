@@ -16,17 +16,7 @@ body {
 }
 
 /* ===== テーブルラップ（横スクロール） ===== */
-.table-wrap {
-  flex: 1; /* ← これが最重要 */
-
-  overflow-x: auto;
-  overflow-y: auto;
-
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
-
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
+.table-wrap { overflow-x: auto; overflow-y: auto; height: calc(100dvh - 120px); padding-bottom: 40px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }　
 
 /* ===== テーブル本体 ===== */
 table {
