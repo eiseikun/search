@@ -286,8 +286,7 @@ window.openColumnModal = ()=>{
 window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
-
-// ================= CSV（上書きモード：main + sub / mainのみ） =================
+// ================= CSV（上書きモード：修正版） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
@@ -307,7 +306,7 @@ window.importCSV = async () => {
   for (const row of parsed.data) {
 
     const mainVal = Number(row.main);
-    const subVal = (row.sub || "").trim(); // ← 空白対策
+    const subVal = (row.sub || "").trim();
 
     const data = {
       no: Number(row.no) || ++maxNo,
@@ -324,37 +323,37 @@ window.importCSV = async () => {
       date: new Date().toLocaleDateString()
     };
 
-    // 必須（mainだけ必須）
     if (!data.main) continue;
 
-    // =========================
-    // 🔥 上書き判定
-    // =========================
     const existing = lastSnapshot.find(d => {
-
       const dMain = Number(d.main);
       const dSub = (d.sub || "").trim();
 
-      // subあり → main + sub
       if (subVal) {
         return dMain === mainVal && dSub === subVal;
       }
-
-      // subなし → mainのみ
       return dMain === mainVal && (!dSub);
     });
 
     if (existing) {
       await updateDoc(doc(db, "items", existing.id), data);
       updateCount++;
+
+      // 🔥 ローカル更新
+      Object.assign(existing, data);
+
     } else {
-      await addDoc(colRef, data);
+      const docRef = await addDoc(colRef, data);
       addCount++;
+
+      // 🔥 ローカル追加
+      lastSnapshot.push({ id: docRef.id, ...data });
     }
   }
 
   alert(`CSV完了\n追加: ${addCount}件\n更新: ${updateCount}件`);
 };
+
 // ================= 全削除（完全修正版） =================
 window.resetAll = async () => {
   if (!confirm("全削除？")) return;
