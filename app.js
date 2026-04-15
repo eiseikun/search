@@ -287,40 +287,41 @@ window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
 
-// ================= CSV（修正なし・正常動作維持） =================
+// ================= CSV（完全対応版） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
 
   const text = await file.text();
-  const lines = text.split(/\r?\n/).filter(l=>l.trim());
-  const headers = lines[0].split(",");
 
-  let maxNo = Math.max(...lastSnapshot.map(d=>d.no||0),0);
+  const parsed = Papa.parse(text, {
+    header: true,        // 1行目をヘッダー扱い
+    skipEmptyLines: true
+  });
 
-  for(let i=1;i<lines.length;i++){
-    const values = lines[i].split(",");
-    const obj = {};
+  let maxNo = Math.max(...lastSnapshot.map(d => d.no || 0), 0);
 
-    headers.forEach((h,j)=>obj[h]=values[j]);
+  for (const row of parsed.data) {
 
     const data = {
-      no: Number(obj.no)||++maxNo,
-      main: Number(obj.main),
-      package: obj.package||"",
-      sub: obj.sub||"",
-      name: obj.name,
-      work: obj.work,
-      place: obj.place||"",
-      url: obj.url||"",
-      fav: Number(obj.fav)||0,
-      ratingCount: Number(obj.ratingCount)||0,
-      siteRating: Number(obj.siteRating)||0,
+      no: Number(row.no) || ++maxNo,
+      main: Number(row.main),
+      package: row.package || "",
+      sub: row.sub || "",
+      name: row.name,
+      work: row.work,
+      place: row.place || "",
+      url: row.url || "",
+      fav: Number(row.fav) || 0,
+      ratingCount: Number(row.ratingCount) || 0,
+      siteRating: Number(row.siteRating) || 0,
       date: new Date().toLocaleDateString()
     };
 
-    if(!data.name || !data.work) continue;
-    await addDoc(colRef,data);
+    // 必須チェック
+    if (!data.main || !data.work) continue;
+
+    await addDoc(colRef, data);
   }
 
   alert("CSV完了");
