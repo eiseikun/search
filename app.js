@@ -286,7 +286,8 @@ window.openColumnModal = ()=>{
 window.closeColumnModal = ()=>{
   columnModal.style.display="none";
 };
-// ================= CSV（上書きモード：修正版） =================
+
+// ================= CSV（完全版：上書き・No維持・カンマ対応） =================
 window.importCSV = async () => {
   const file = csvFile.files[0];
   if (!file) return alert("ファイルなし");
@@ -308,8 +309,36 @@ window.importCSV = async () => {
     const mainVal = Number(row.main);
     const subVal = (row.sub || "").trim();
 
+    // 必須チェック（mainのみ必須）
+    if (!mainVal) continue;
+
+    // 🔥 上書き判定（main + sub / mainのみ）
+    const existing = lastSnapshot.find(d => {
+
+      const dMain = Number(d.main);
+      const dSub = (d.sub || "").trim();
+
+      // subあり → main + sub
+      if (subVal) {
+        return dMain === mainVal && dSub === subVal;
+      }
+
+      // subなし → mainのみ
+      return dMain === mainVal && !dSub;
+    });
+    // 🔥 No制御
+    let noVal = Number(row.no);
+
+    if (existing) {
+      // 上書き → 既存No維持
+      noVal = existing.no;
+    } else {
+      // 新規 → CSVにあれば使う、なければ採番
+      noVal = noVal || ++maxNo;
+    }
+    // データ生成
     const data = {
-      no: Number(row.no) || ++maxNo,
+      no: noVal,
       main: mainVal,
       package: row.package || "",
       sub: subVal,
@@ -323,30 +352,19 @@ window.importCSV = async () => {
       date: new Date().toLocaleDateString()
     };
 
-    if (!data.main) continue;
-
-    const existing = lastSnapshot.find(d => {
-      const dMain = Number(d.main);
-      const dSub = (d.sub || "").trim();
-
-      if (subVal) {
-        return dMain === mainVal && dSub === subVal;
-      }
-      return dMain === mainVal && (!dSub);
-    });
-
+    // 🔥 更新 or 追加=
     if (existing) {
       await updateDoc(doc(db, "items", existing.id), data);
       updateCount++;
 
-      // 🔥 ローカル更新
+      // 🔥 ローカル更新（重要）
       Object.assign(existing, data);
 
     } else {
       const docRef = await addDoc(colRef, data);
       addCount++;
 
-      // 🔥 ローカル追加
+      // 🔥 ローカル追加（重要）
       lastSnapshot.push({ id: docRef.id, ...data });
     }
   }
