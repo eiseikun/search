@@ -213,7 +213,9 @@ data = data.sort((a, b) => {
 <td>${d.ratingCount}</td>
 <td>${d.siteRating}</td>
 <td>${d.selfRating ?? ""}</td>
-<td>${d.comment ?? ""}</td>
+<td class="comment-cell" onclick="toggleComment(this)">
+  ${d.comment ?? ""}
+</td>
 <td>${d.date}</td>
 
 <td><button onclick="updateDate('${d.id}')">更新</button></td>
