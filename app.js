@@ -404,31 +404,36 @@ window.importCSV = async () => {
 // ================= CSV（出力） =================
 window.exportCSV = async () => {
 
-  // 🔥 最新データ取得
   const snap = await getDocs(colRef);
-  const data = snap.docs.map(d => d.data());
+  let data = snap.docs.map(d => d.data());
 
   if (data.length === 0) {
     alert("データなし");
     return;
   }
 
-  // 🔥 ヘッダー
+  // 🔥 No順で完全固定
+  data.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
+
   const headers = [
     "no","main","package","sub","name","work",
     "place","url","fav","ratingCount","siteRating","date"
   ];
 
-  // 🔥 CSV生成
   const csv = [
     headers.join(","),
 
     ...data.map(row =>
       headers.map(h => {
-        let val = row[h] ?? "";
+        let val = row[h];
 
-        // 🔥 カンマ・改行対策
-        val = String(val).replace(/"/g, '""');
+        if (val === null || val === undefined) val = "";
+
+        // 🔥 型崩さない
+        val = String(val);
+
+        // 🔥 CSV安全処理
+        val = val.replace(/"/g, '""');
         if (val.includes(",") || val.includes("\n")) {
           val = `"${val}"`;
         }
@@ -438,15 +443,16 @@ window.exportCSV = async () => {
     )
   ].join("\n");
 
-  // 🔥 ダウンロード
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "export.csv";
-  a.click();
 
+  // 🔥 ファイル名固定（同一性重視）
+  a.download = "export.csv";
+
+  a.click();
   URL.revokeObjectURL(url);
 };
 // ================= 全削除（完全修正版） =================
