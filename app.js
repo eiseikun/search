@@ -409,6 +409,9 @@ window.exportCSV = async () => {
 
   if (data.length === 0) return alert("データなし");
 
+  // 🔥 No順で固定
+  data.sort((a, b) => (a.no || 0) - (b.no || 0));
+
   const headers = [
     "main","package","sub","name","work",
     "place","url","fav","ratingCount","siteRating"
@@ -422,7 +425,6 @@ window.exportCSV = async () => {
 
         let val = row[h];
 
-        // 数値0 → 空に戻す
         if (
           (h === "fav" || h === "ratingCount" || h === "siteRating")
           && (val === 0 || val === "0")
@@ -444,7 +446,6 @@ window.exportCSV = async () => {
     )
   ].join("\n");
 
-  // 🔥 これが超重要（BOM追加）
   const BOM = "\uFEFF";
   const blob = new Blob([BOM + csvBody], {
     type: "text/csv;charset=utf-8;"
