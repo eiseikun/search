@@ -407,33 +407,19 @@ window.exportCSV = async () => {
   const snap = await getDocs(colRef);
   let data = snap.docs.map(d => d.data());
 
-  if (data.length === 0) {
-    alert("データなし");
-    return;
-  }
+  if (data.length === 0) return alert("データなし");
 
-  // 🔥 No順で完全固定
-  data.sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0));
-
-  const headers = [
-    "no","main","package","sub","name","work",
-    "place","url","fav","ratingCount","siteRating","date"
-  ];
+  // 🔥 ヘッダーは元CSVに合わせる
+  const headers = Object.keys(data[0]);
 
   const csv = [
     headers.join(","),
 
     ...data.map(row =>
       headers.map(h => {
-        let val = row[h];
+        let val = row[h] ?? "";
 
-        if (val === null || val === undefined) val = "";
-
-        // 🔥 型崩さない
-        val = String(val);
-
-        // 🔥 CSV安全処理
-        val = val.replace(/"/g, '""');
+        val = String(val).replace(/"/g, '""');
         if (val.includes(",") || val.includes("\n")) {
           val = `"${val}"`;
         }
@@ -448,11 +434,9 @@ window.exportCSV = async () => {
 
   const a = document.createElement("a");
   a.href = url;
-
-  // 🔥 ファイル名固定（同一性重視）
   a.download = "export.csv";
-
   a.click();
+
   URL.revokeObjectURL(url);
 };
 // ================= 全削除（完全修正版） =================
