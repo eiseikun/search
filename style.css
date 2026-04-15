@@ -57,6 +57,8 @@ td {
 .name-cell.expanded {
   white-space: normal;
   overflow: visible;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* ===== 重要列サイズ調整 ===== */
