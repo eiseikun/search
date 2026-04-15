@@ -409,22 +409,39 @@ window.exportCSV = async () => {
 
   if (data.length === 0) return alert("データなし");
 
-  // 🔥 ヘッダーは元CSVに合わせる
-  const headers = Object.keys(data[0]);
+  // 🔥 元CSVと完全一致ヘッダー
+  const headers = [
+    "main","package","sub","name","work",
+    "place","url","fav","ratingCount","siteRating"
+  ];
 
   const csv = [
     headers.join(","),
 
     ...data.map(row =>
       headers.map(h => {
-        let val = row[h] ?? "";
+
+        let val = row[h];
+
+        // 🔥 0を空に戻す（重要）
+        if (
+          (h === "fav" || h === "ratingCount" || h === "siteRating")
+          && (val === 0 || val === "0")
+        ) {
+          val = "";
+        }
+
+        // 🔥 undefined/null → 空
+        if (val === undefined || val === null) val = "";
 
         val = String(val).replace(/"/g, '""');
+
         if (val.includes(",") || val.includes("\n")) {
           val = `"${val}"`;
         }
 
         return val;
+
       }).join(",")
     )
   ].join("\n");
