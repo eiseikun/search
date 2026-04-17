@@ -489,12 +489,6 @@ window.resetAll = async () => {
   );
 };
 
-// ================= 更新日 =================
-window.updateDate = async id=>{
-  await updateDoc(doc(db,"items",id),{
-    date:new Date().toLocaleDateString()
-  });
-};
 // ================= 名前全表示 =================
 window.toggleName = (el) => {
   el.classList.toggle("expanded");
