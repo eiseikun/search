@@ -247,8 +247,15 @@ window.sortBy = (key)=>{
 };
 
 // ================= モーダル =================
-window.openModal = ()=>modal.style.display="block";
-window.closeModal = ()=>modal.style.display="none";
+window.openModal = ()=>{
+  modal.style.display="block";
+  lockScroll(); // ←追加
+};
+
+window.closeModal = ()=>{
+  modal.style.display="none";
+  unlockScroll(); // ←追加
+};
 
 // ================= 列表示 =================
 window.toggleDetails = () => {
@@ -319,10 +326,12 @@ function syncCheckbox(){
 window.openColumnModal = ()=>{
   columnModal.style.display="block";
   syncCheckbox();
+  lockScroll(); // ←追加
 };
 
 window.closeColumnModal = ()=>{
   columnModal.style.display="none";
+  unlockScroll(); // ←追加
 };
 
 // ================= CSV（完全安定版） =================
@@ -506,4 +515,11 @@ window.toggleManage = () => {
   btn.textContent = isOpen ? "⚙️" : "閉じる";
 };
 
+// ================= スクロールロック =================
+function lockScroll() {
+  document.body.style.overflow = "hidden";
+}
 
+function unlockScroll() {
+  document.body.style.overflow = "";
+}
