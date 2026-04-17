@@ -218,7 +218,6 @@ data = data.sort((a, b) => {
 </td>
 <td>${d.date}</td>
 
-<td><button onclick="updateDate('${d.id}')">更新</button></td>
 <td><button onclick="startEdit('${d.id}','${d.main}','${d.package}','${d.sub}','${d.name}','${d.work}','${d.place}','${d.url}','${d.fav}','${d.ratingCount}','${d.siteRating}','${d.selfRating}','${d.comment}')">編集</button></td>
 <td><button onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
@@ -285,7 +284,7 @@ window.applyColumnVisibility = () => {
       }
 
       // 🔥 追加：操作列は強制非表示
-      if (i === 14 || i === 15 || i === 16) {
+      if (i === 14 || i === 15) {
         cell.style.display = "none";
         return;
       }
