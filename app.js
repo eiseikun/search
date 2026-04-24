@@ -425,7 +425,7 @@ window.exportCSV = async () => {
 
   if (data.length === 0) return alert("データなし");
 
-  // 🔥 No順で固定
+  // No順
   data.sort((a, b) => (a.no || 0) - (b.no || 0));
 
   const headers = [
@@ -440,9 +440,16 @@ window.exportCSV = async () => {
       headers.map(h => {
 
         let val = row[h];
-if (typeof val === "string" && /^\d+-\d+$/.test(val)) {
-  val = `="${val}"`;
-}
+
+        // null対策
+        if (val === undefined || val === null) val = "";
+
+        // 🔥 Excelの日付誤変換防止（最重要）
+        if (typeof val === "string" && /^\d+-\d+$/.test(val)) {
+          val = "'" + val;
+        }
+
+        // 0を空に
         if (
           (h === "fav" || h === "ratingCount" || h === "siteRating")
           && (val === 0 || val === "0")
@@ -450,11 +457,14 @@ if (typeof val === "string" && /^\d+-\d+$/.test(val)) {
           val = "";
         }
 
-        if (val === undefined || val === null) val = "";
+        // 文字列化
+        val = String(val);
 
-        val = String(val).replace(/"/g, '""');
+        // ダブルクォートエスケープ
+        val = val.replace(/"/g, '""');
 
-        if (val.includes(",") || val.includes("\n")) {
+        // カンマ・改行・ダブルクォート含む場合は囲む
+        if (val.includes(",") || val.includes("\n") || val.includes('"')) {
           val = `"${val}"`;
         }
 
