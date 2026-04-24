@@ -440,7 +440,9 @@ window.exportCSV = async () => {
       headers.map(h => {
 
         let val = row[h];
-
+if (typeof val === "string" && /^\d+-\d+$/.test(val)) {
+  val = `="${val}"`;
+}
         if (
           (h === "fav" || h === "ratingCount" || h === "siteRating")
           && (val === 0 || val === "0")
