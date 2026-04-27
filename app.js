@@ -359,10 +359,17 @@ window.importCSV = async () => {
     const mainVal = Number(row.main);
     let subVal = (row.sub || "").trim();
 
-// 🔥 Excelで 1-3 → 1/3 になったのを戻す
+// 🔥 ="xxx" を外す
+if (/^=".*"$/.test(subVal)) {
+  subVal = subVal.slice(2, -1);
+}
+
+// 🔥 念のため
 if (/^\d+\/\d+$/.test(subVal)) {
   subVal = subVal.replace("/", "-");
 }
+
+
 
     if (!mainVal) continue;
 
@@ -435,7 +442,6 @@ window.exportCSV = async () => {
 
   if (data.length === 0) return alert("データなし");
 
-  // No順
   data.sort((a, b) => (a.no || 0) - (b.no || 0));
 
   const headers = [
@@ -451,34 +457,18 @@ window.exportCSV = async () => {
 
         let val = row[h];
 
-        // null対策
         if (val === undefined || val === null) val = "";
 
-        // 🔥 Excelの日付誤変換防止（最重要）
-        if (typeof val === "string" && /^\d+-\d+$/.test(val)) {
-          val = "'" + val;
-        }
+        // 🔥 数値はそのまま（並びや計算に使うため）
+        if (typeof val === "number") return val;
 
-        // 0を空に
-        if (
-          (h === "fav" || h === "ratingCount" || h === "siteRating")
-          && (val === 0 || val === "0")
-        ) {
-          val = "";
-        }
-
-        // 文字列化
         val = String(val);
 
         // ダブルクォートエスケープ
         val = val.replace(/"/g, '""');
 
-        // カンマ・改行・ダブルクォート含む場合は囲む
-        if (val.includes(",") || val.includes("\n") || val.includes('"')) {
-          val = `"${val}"`;
-        }
-
-        return val;
+        // 🔥 Excel完全防御（最強）
+        return `="${val}"`;
 
       }).join(",")
     )
