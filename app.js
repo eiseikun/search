@@ -136,52 +136,14 @@ window.render = function(){
   );
 // ソート
 data = data.sort((a, b) => {
+
   // =========================
-  // 🔥 最優先キーあり
+  // 👑 名前固定ONのとき（最優先）
   // =========================
-  if (primarySort) {
-
-    let P1 = a[primarySort] ?? "";
-    let P2 = b[primarySort] ?? "";
-
-    // 数値判定
-    const num1 = Number(P1);
-    const num2 = Number(P2);
-    const isNum = !isNaN(num1) && !isNaN(num2);
-
-    if (isNum) {
-      if (num1 !== num2) return num2 - num1; // ← 基本降順
-    } else {
-      if (P1 !== P2) {
-        return String(P1).localeCompare(String(P2), "ja", { numeric: true });
-      }
-    }
-
-    // 🔥 同じグループ内だけ currentSort を適用
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
-
-    const nA = Number(A);
-    const nB = Number(B);
-    const isNum2 = !isNaN(nA) && !isNaN(nB);
-
-    if (isNum2) {
-      return sortAsc ? nA - nB : nB - nA;
-    }
-
-    return sortAsc
-      ? String(A).localeCompare(String(B), "ja", { numeric: true })
-      : String(B).localeCompare(String(A), "ja", { numeric: true });
-  }
-  
-  // =========================
-  // 👤 名前ソート（出現回数順）
-  // =========================
-  if (currentSort === "name") {
+  if (primarySort === "name") {
 
     const countMap = {};
 
-    // 出現回数を事前計算
     lastSnapshot.forEach(d => {
       const n = d.name || "";
       countMap[n] = (countMap[n] || 0) + 1;
@@ -190,14 +152,45 @@ data = data.sort((a, b) => {
     const countA = countMap[a.name || ""] || 0;
     const countB = countMap[b.name || ""] || 0;
 
-    // 多い順が基本
+    // ① 名前グループ順（最優先）
     if (countA !== countB) {
-      return sortAsc
-        ? countB - countA   // 多い → 少ない
-        : countA - countB;  // 少ない → 多い
+      return sortAsc ? countB - countA : countA - countB;
     }
 
-    // 同数なら名前順で安定化
+    // ② 同じ名前の中でサブソート
+    let A = a[currentSort] ?? "";
+    let B = b[currentSort] ?? "";
+
+    const numA = Number(A);
+    const numB = Number(B);
+    const isNum = !isNaN(numA) && !isNaN(numB);
+
+    if (isNum) {
+      return sortAsc ? numA - numB : numB - numA;
+    }
+
+    return String(A).localeCompare(String(B), "ja", { numeric: true });
+  }
+
+  // =========================
+  // 👤 名前単体ソート（通常）
+  // =========================
+  if (currentSort === "name") {
+
+    const countMap = {};
+
+    lastSnapshot.forEach(d => {
+      const n = d.name || "";
+      countMap[n] = (countMap[n] || 0) + 1;
+    });
+
+    const countA = countMap[a.name || ""] || 0;
+    const countB = countMap[b.name || ""] || 0;
+
+    if (countA !== countB) {
+      return sortAsc ? countB - countA : countA - countB;
+    }
+
     return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
   }
 
