@@ -153,10 +153,14 @@ data = data.sort((a, b) => {
   const countA = countMap[a.name || ""] || 0;
   const countB = countMap[b.name || ""] || 0;
 
-  // 👇ここ重要（nameSortAscに変更）
-  if (countA !== countB) {
-    return nameSortAsc ? countB - countA : countA - countB;
-  }
+  // ① 出現回数でグループ順
+if (countA !== countB) {
+  return nameSortAsc ? countB - countA : countA - countB;
+}
+
+// ② 同じ回数なら「名前」でグループ固定
+const nameCompare = String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
+if (nameCompare !== 0) return nameCompare;
 
   // 👇サブソートは subSortKey を使う
 let A = a[subSortKey] ?? "";
