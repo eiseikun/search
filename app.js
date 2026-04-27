@@ -292,6 +292,18 @@ window.sortBy = (key) => {
   render();
 };
 
+window.togglePrimaryName = () => {
+  if (primarySort === "name") {
+    primarySort = null;
+  } else {
+    primarySort = "name";
+  }
+
+  document.getElementById("primaryBtn").textContent =
+    primarySort === "name" ? "名前固定ON" : "名前固定OFF";
+
+  render();
+};
 // ================= モーダル =================
 window.openModal = ()=>{
   modal.style.display="block";
