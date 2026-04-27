@@ -507,11 +507,15 @@ window.exportCSV = async () => {
   // ダブルクォートエスケープ
   val = val.replace(/"/g, '""');
 
-  // 🔥 subだけ保護
-  if (h === "sub") {
-    return `="${val}"`;
-  }
+  // 🔥 sub保護（Excel対策）
+if (h === "sub") {
+  return `="${val}"`;
+}
 
+// 🔥 name保護（カンマ対策）
+if (h === "name") {
+  return `"${val}"`;
+}
   return val;
 
 }).join(",")
