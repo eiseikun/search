@@ -28,6 +28,7 @@ let columnMode = false;
 let currentSort = "no";
 let sortAsc = true;
 let primarySort = null; // 最優先キー
+let nameSortAsc = true;
 // ================= localStorage =================
 function getHiddenCols(){
   return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
@@ -271,24 +272,26 @@ document.querySelectorAll("#list tr").forEach(row => {
 
 // ================= ソート =================
 window.sortBy = (key) => {
-  // primary未設定なら普通の動き
-  if (!primarySort) {
-    if (currentSort === key) sortAsc = !sortAsc;
-    else {
-      currentSort = key;
-      sortAsc = true;
+  // 👇 名前クリック時
+  if (key === "name") {
+    if (currentSort === "name") {
+      nameSortAsc = !nameSortAsc; // ←こっちを反転
+    } else {
+      currentSort = "name";
+      nameSortAsc = true;
     }
     render();
     return;
   }
 
-  // primary設定中は「サブソート」として動く
+  // 👇 それ以外
   if (currentSort === key) {
     sortAsc = !sortAsc;
   } else {
     currentSort = key;
     sortAsc = true;
   }
+
   render();
 };
 
