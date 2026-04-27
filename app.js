@@ -437,12 +437,52 @@ if (!noVal || isNaN(noVal)) {
 // ================= CSV（出力） =================
 window.exportCSV = async () => {
 
-  const snap = await getDocs(colRef);
-  let data = snap.docs.map(d => d.data());
+  let data = [...lastSnapshot]; // ←ここ変更
 
   if (data.length === 0) return alert("データなし");
 
-  data.sort((a, b) => (a.no || 0) - (b.no || 0));
+  // 🔥 renderと同じ条件で並び替え
+  data = data.sort((a, b) => {
+
+  if (currentSort === "name") {
+
+    const countMap = {};
+    lastSnapshot.forEach(d => {
+      const n = d.name || "";
+      countMap[n] = (countMap[n] || 0) + 1;
+    });
+
+    const countA = countMap[a.name || ""] || 0;
+    const countB = countMap[b.name || ""] || 0;
+
+    if (countA !== countB) {
+      return sortAsc ? countB - countA : countA - countB;
+    }
+
+    return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
+  }
+
+  let A = a[currentSort] ?? "";
+  let B = b[currentSort] ?? "";
+
+  const numA = Number(A);
+  const numB = Number(B);
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) {
+    return sortAsc ? numA - numB : numB - numA;
+  }
+
+  if (currentSort === "date") {
+    return sortAsc
+      ? new Date(A) - new Date(B)
+      : new Date(B) - new Date(A);
+  }
+
+  return sortAsc
+    ? String(A).localeCompare(String(B), "ja", { numeric: true })
+    : String(B).localeCompare(String(A), "ja", { numeric: true });
+});
 
   const headers = [
     "no","main","package","sub","name","work",
