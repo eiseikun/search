@@ -29,6 +29,7 @@ let currentSort = "no";
 let sortAsc = true;
 let primarySort = null; // 最優先キー
 let nameSortAsc = true;
+let subSortKey = "no";
 // ================= localStorage =================
 function getHiddenCols(){
   return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
@@ -141,37 +142,36 @@ data = data.sort((a, b) => {
   // =========================
   // 👑 名前固定ONのとき（最優先）
   // =========================
-  if (primarySort === "name") {
+ if (primarySort === "name") {
 
-    const countMap = {};
+  const countMap = {};
+  lastSnapshot.forEach(d => {
+    const n = d.name || "";
+    countMap[n] = (countMap[n] || 0) + 1;
+  });
 
-    lastSnapshot.forEach(d => {
-      const n = d.name || "";
-      countMap[n] = (countMap[n] || 0) + 1;
-    });
+  const countA = countMap[a.name || ""] || 0;
+  const countB = countMap[b.name || ""] || 0;
 
-    const countA = countMap[a.name || ""] || 0;
-    const countB = countMap[b.name || ""] || 0;
-
-    // ① 名前グループ順（最優先）
-    if (countA !== countB) {
-      return sortAsc ? countB - countA : countA - countB;
-    }
-
-    // ② 同じ名前の中でサブソート
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
-
-    const numA = Number(A);
-    const numB = Number(B);
-    const isNum = !isNaN(numA) && !isNaN(numB);
-
-    if (isNum) {
-      return sortAsc ? numA - numB : numB - numA;
-    }
-
-    return String(A).localeCompare(String(B), "ja", { numeric: true });
+  // 👇ここ重要（nameSortAscに変更）
+  if (countA !== countB) {
+    return nameSortAsc ? countB - countA : countA - countB;
   }
+
+  // 👇サブソートは subSortKey を使う
+let A = a[subSortKey] ?? "";
+let B = b[subSortKey] ?? "";
+
+  const numA = Number(A);
+  const numB = Number(B);
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) {
+    return sortAsc ? numA - numB : numB - numA;
+  }
+
+  return String(A).localeCompare(String(B), "ja", { numeric: true });
+}
 
   // =========================
   // 👤 名前単体ソート（通常）
@@ -189,8 +189,8 @@ data = data.sort((a, b) => {
     const countB = countMap[b.name || ""] || 0;
 
     if (countA !== countB) {
-      return sortAsc ? countB - countA : countA - countB;
-    }
+  return nameSortAsc ? countB - countA : countA - countB;
+}
 
     return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
   }
@@ -272,19 +272,33 @@ document.querySelectorAll("#list tr").forEach(row => {
 
 // ================= ソート =================
 window.sortBy = (key) => {
-  // 👇 名前クリック時
-  if (key === "name") {
-    if (currentSort === "name") {
-      nameSortAsc = !nameSortAsc; // ←こっちを反転
+
+  // 👤 名前クリック
+ if (key === "name") {
+  if (currentSort === "name") {
+    nameSortAsc = !nameSortAsc;
+  } else {
+    currentSort = "name";
+    nameSortAsc = true;
+  }
+  render();
+  return;
+}
+
+  // 👑 名前固定中
+  if (primarySort === "name") {
+
+    // 👉 サブソートとして扱う
+    if (subSortKey === key) {
+      sortAsc = !sortAsc;
     } else {
-      currentSort = "name";
-      nameSortAsc = true;
+      subSortKey = key;
+      sortAsc = true;
     }
     render();
     return;
   }
-
-  // 👇 それ以外
+  // 🟢 通常動作
   if (currentSort === key) {
     sortAsc = !sortAsc;
   } else {
