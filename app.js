@@ -376,6 +376,11 @@ window.importCSV = async () => {
     // 🔥 No制御
     let noVal = Number(row.no);
 
+// Noが無い or 不正なら自動採番
+if (!noVal || isNaN(noVal)) {
+  noVal = ++maxNo;
+}
+
     if (existing) {
       noVal = existing.no;
     } else {
@@ -429,7 +434,7 @@ window.exportCSV = async () => {
   data.sort((a, b) => (a.no || 0) - (b.no || 0));
 
   const headers = [
-    "main","package","sub","name","work",
+    "no","main","package","sub","name","work",
     "place","url","fav","ratingCount","siteRating","selfRating","comment"
   ];
 
