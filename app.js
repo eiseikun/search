@@ -455,22 +455,26 @@ window.exportCSV = async () => {
     ...data.map(row =>
       headers.map(h => {
 
-        let val = row[h];
+  let val = row[h];
 
-        if (val === undefined || val === null) val = "";
+  if (val === undefined || val === null) val = "";
 
-        // 🔥 数値はそのまま（並びや計算に使うため）
-        if (typeof val === "number") return val;
+  // 数値はそのまま
+  if (typeof val === "number") return val;
 
-        val = String(val);
+  val = String(val);
 
-        // ダブルクォートエスケープ
-        val = val.replace(/"/g, '""');
+  // ダブルクォートエスケープ
+  val = val.replace(/"/g, '""');
 
-        // 🔥 Excel完全防御（最強）
-        return `="${val}"`;
+  // 🔥 subだけ保護
+  if (h === "sub") {
+    return `="${val}"`;
+  }
 
-      }).join(",")
+  return val;
+
+}).join(",")
     )
   ].join("\n");
 
