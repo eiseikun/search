@@ -357,7 +357,12 @@ window.importCSV = async () => {
   for (const row of parsed.data) {
 
     const mainVal = Number(row.main);
-    const subVal = (row.sub || "").trim();
+    let subVal = (row.sub || "").trim();
+
+// 🔥 Excelで 1-3 → 1/3 になったのを戻す
+if (/^\d+\/\d+$/.test(subVal)) {
+  subVal = subVal.replace("/", "-");
+}
 
     if (!mainVal) continue;
 
