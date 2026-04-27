@@ -27,7 +27,7 @@ let editId = null;
 let columnMode = false;
 let currentSort = "no";
 let sortAsc = true;
-
+let primarySort = null; // 最優先キー
 // ================= localStorage =================
 function getHiddenCols(){
   return JSON.parse(localStorage.getItem("hiddenCols") || "[]");
@@ -136,7 +136,44 @@ window.render = function(){
   );
 // ソート
 data = data.sort((a, b) => {
+  // =========================
+  // 🔥 最優先キーあり
+  // =========================
+  if (primarySort) {
 
+    let P1 = a[primarySort] ?? "";
+    let P2 = b[primarySort] ?? "";
+
+    // 数値判定
+    const num1 = Number(P1);
+    const num2 = Number(P2);
+    const isNum = !isNaN(num1) && !isNaN(num2);
+
+    if (isNum) {
+      if (num1 !== num2) return num2 - num1; // ← 基本降順
+    } else {
+      if (P1 !== P2) {
+        return String(P1).localeCompare(String(P2), "ja", { numeric: true });
+      }
+    }
+
+    // 🔥 同じグループ内だけ currentSort を適用
+    let A = a[currentSort] ?? "";
+    let B = b[currentSort] ?? "";
+
+    const nA = Number(A);
+    const nB = Number(B);
+    const isNum2 = !isNaN(nA) && !isNaN(nB);
+
+    if (isNum2) {
+      return sortAsc ? nA - nB : nB - nA;
+    }
+
+    return sortAsc
+      ? String(A).localeCompare(String(B), "ja", { numeric: true })
+      : String(B).localeCompare(String(A), "ja", { numeric: true });
+  }
+  
   // =========================
   // 👤 名前ソート（出現回数順）
   // =========================
@@ -188,6 +225,7 @@ data = data.sort((a, b) => {
     ? String(A).localeCompare(String(B), "ja", { numeric: true })
     : String(B).localeCompare(String(A), "ja", { numeric: true });
 });
+  
   document.getElementById("resultCount").textContent = `${data.length}件`;
 
   let html = "";
@@ -239,9 +277,25 @@ document.querySelectorAll("#list tr").forEach(row => {
 };
 
 // ================= ソート =================
-window.sortBy = (key)=>{
-  if(currentSort === key) sortAsc = !sortAsc;
-  else { currentSort = key; sortAsc = true; }
+window.sortBy = (key) => {
+  // primary未設定なら普通の動き
+  if (!primarySort) {
+    if (currentSort === key) sortAsc = !sortAsc;
+    else {
+      currentSort = key;
+      sortAsc = true;
+    }
+    render();
+    return;
+  }
+
+  // primary設定中は「サブソート」として動く
+  if (currentSort === key) {
+    sortAsc = !sortAsc;
+  } else {
+    currentSort = key;
+    sortAsc = true;
+  }
   render();
 };
 
