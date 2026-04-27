@@ -520,10 +520,49 @@ window.exportCSV = async () => {
   let data = [...lastSnapshot]; // ←ここ変更
 
   if (data.length === 0) return alert("データなし");
-
-  // 🔥 renderと同じ条件で並び替え
   data = data.sort((a, b) => {
 
+  // =========================
+  // 👑 名前固定ON（renderと完全一致）
+  // =========================
+  if (primarySort === "name") {
+
+    const countMap = {};
+    lastSnapshot.forEach(d => {
+      const n = d.name || "";
+      countMap[n] = (countMap[n] || 0) + 1;
+    });
+
+    const countA = countMap[a.name || ""] || 0;
+    const countB = countMap[b.name || ""] || 0;
+
+    // ① 出現回数
+    if (countA !== countB) {
+      return nameSortAsc ? countB - countA : countA - countB;
+    }
+
+    // ② 名前固定（グループ崩れ防止）
+    const nameCompare = String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
+    if (nameCompare !== 0) return nameCompare;
+
+    // ③ サブソート（←超重要）
+    let A = a[subSortKey] ?? "";
+    let B = b[subSortKey] ?? "";
+
+    const numA = Number(A);
+    const numB = Number(B);
+    const isNum = !isNaN(numA) && !isNaN(numB);
+
+    if (isNum) {
+      return sortAsc ? numA - numB : numB - numA;
+    }
+
+    return String(A).localeCompare(String(B), "ja", { numeric: true });
+  }
+
+  // =========================
+  // 👤 名前ソート単体
+  // =========================
   if (currentSort === "name") {
 
     const countMap = {};
@@ -536,12 +575,15 @@ window.exportCSV = async () => {
     const countB = countMap[b.name || ""] || 0;
 
     if (countA !== countB) {
-      return sortAsc ? countB - countA : countA - countB;
+      return nameSortAsc ? countB - countA : countA - countB;
     }
 
     return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
   }
 
+  // =========================
+  // 通常ソート
+  // =========================
   let A = a[currentSort] ?? "";
   let B = b[currentSort] ?? "";
 
@@ -563,6 +605,8 @@ window.exportCSV = async () => {
     ? String(A).localeCompare(String(B), "ja", { numeric: true })
     : String(B).localeCompare(String(A), "ja", { numeric: true });
 });
+  
+  
 
   const headers = [
     "no","main","package","sub","name","work",
