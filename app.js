@@ -478,7 +478,7 @@ if (!noVal || isNaN(noVal)) {
     } else {
       noVal = noVal || ++maxNo;
     }
-
+    
     const data = {
       no: noVal,
       main: mainVal,
@@ -493,8 +493,12 @@ if (!noVal || isNaN(noVal)) {
       siteRating: Number(row.siteRating) || 0,
       selfRating: Number(row.selfRating) || 0,
       comment: row.comment || "",
-      date: new Date().toLocaleDateString()
-    };
+
+  // 新規は空、更新時だけ日付
+  date: existing
+    ? new Date().toLocaleDateString()
+    : ""
+};
 
     if (existing) {
       await updateDoc(doc(db, "items", existing.id), data);
