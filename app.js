@@ -474,35 +474,54 @@ if (!noVal || isNaN(noVal)) {
 }
 
     if (existing) {
-      noVal = existing.no;
-    } else {
-      noVal = noVal || ++maxNo;
-    }
-    
-    const data = {
-      no: noVal,
-      main: mainVal,
-      package: row.package || "",
-      sub: subVal,
-      name: row.name,
-      work: row.work,
-      place: row.place || "",
-      url: row.url || "",
-      fav: Number(row.fav) || 0,
-      ratingCount: Number(row.ratingCount) || 0,
-      siteRating: Number(row.siteRating) || 0,
-      selfRating: Number(row.selfRating) || 0,
-      comment: row.comment || "",
+  noVal = existing.no;
+} else {
+  noVal = noVal || ++maxNo;
+}
 
-  // 新規は空、更新時だけ日付
-  date: existing
+// ================= 差分判定 =================
+const isChanged = existing && (
+  (existing.package || "") !== (row.package || "") ||
+  (existing.name || "") !== (row.name || "") ||
+  (existing.work || "") !== (row.work || "") ||
+  (existing.place || "") !== (row.place || "") ||
+  (existing.url || "") !== (row.url || "") ||
+  Number(existing.fav || 0) !== Number(row.fav || 0) ||
+  Number(existing.ratingCount || 0) !== Number(row.ratingCount || 0) ||
+  Number(existing.siteRating || 0) !== Number(row.siteRating || 0) ||
+  Number(existing.selfRating || 0) !== Number(row.selfRating || 0) ||
+  (existing.comment || "") !== (row.comment || "")
+);
+
+const data = {
+  no: noVal,
+  main: mainVal,
+  package: row.package || "",
+  sub: subVal,
+  name: row.name,
+  work: row.work,
+  place: row.place || "",
+  url: row.url || "",
+  fav: Number(row.fav) || 0,
+  ratingCount: Number(row.ratingCount) || 0,
+  siteRating: Number(row.siteRating) || 0,
+  selfRating: Number(row.selfRating) || 0,
+  comment: row.comment || "",
+
+  // ================= 更新日制御 =================
+  date: isChanged
     ? new Date().toLocaleDateString()
-    : ""
+    : (existing?.date || "")
 };
 
     if (existing) {
-      await updateDoc(doc(db, "items", existing.id), data);
-      updateCount++;
+
+  await updateDoc(doc(db, "items", existing.id), data);
+
+  if (isChanged) {
+    updateCount++;
+  }
+
 
       // 🔥 ローカル更新
       Object.assign(existing, data);
