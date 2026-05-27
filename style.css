@@ -58,7 +58,7 @@ td {
 
 /* ===== 名前クリックで展開 ===== */
 .name-cell {
-  max-width: 20px;
+  max-width: 10px;
   cursor: pointer;
 }
 
@@ -88,7 +88,7 @@ th:nth-child(1), td:nth-child(1) { min-width: 10px; }   /* No */
 th:nth-child(2), td:nth-child(2) { min-width: 10px; }   /* 大 */
 th:nth-child(3), td:nth-child(3) { min-width: 30px; }   /* パッケージ */
 th:nth-child(4), td:nth-child(4) { min-width: 20px; }   /* 小 */
-th:nth-child(5), td:nth-child(5) { min-width: 20px; }  /* 名前 */
+th:nth-child(5), td:nth-child(5) { min-width: 10px; }  /* 名前 */
 th:nth-child(6), td:nth-child(6) { min-width: 20px; }  /* 作品 */
 th:nth-child(7), td:nth-child(7) { min-width: 30px; }  /* 部分 */
 th:nth-child(8), td:nth-child(8) { min-width: 10px; }   /* URL */
