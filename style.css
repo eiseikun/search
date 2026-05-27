@@ -86,7 +86,7 @@ td {
   overflow-wrap: anywhere;
 }
 /* ===== 重要列サイズ調整 ===== */
-th:nth-child(1), td:nth-child(1) { min-width: 40px; }   /* No */
+th:nth-child(1), td:nth-child(1) { min-width: 100px; }   /* No */
 th:nth-child(2), td:nth-child(2) { min-width: 30px; }   /* 大 */
 th:nth-child(4), td:nth-child(4) { min-width: 50px; }   /* 小 */
 th:nth-child(5), td:nth-child(5) { min-width: 80px; }  /* 名前 */
