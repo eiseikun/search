@@ -58,7 +58,7 @@ td {
 
 /* ===== 名前クリックで展開 ===== */
 .name-cell {
-  min-width: 60px;
+  min-width: 20px;
   max-width: 120px;
   cursor: pointer;
 }
