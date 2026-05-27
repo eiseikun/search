@@ -78,7 +78,7 @@ td {
   overflow-wrap: anywhere;
 }
 /* ===== 列サイズ調整 ===== */
-th:nth-child(1), td:nth-child(1) { width: 40px; }   /* No */
+th:nth-child(1), td:nth-child(1) { width: 80px; }   /* No */
 th:nth-child(2), td:nth-child(2) { width: 50px; }   /* 大 */
 th:nth-child(3), td:nth-child(3) { width: 120px; }  /* パッケージ */
 th:nth-child(4), td:nth-child(4) { width: 80px; }   /* 小 */
