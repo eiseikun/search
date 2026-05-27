@@ -62,7 +62,7 @@ td {
 
 .name-cell.expanded {
   white-space: normal;
-  overflow: visible;
+  overflow: hidden;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -73,7 +73,7 @@ td {
 
 .comment-cell.expanded {
   white-space: normal;
-  overflow: visible;
+  overflow: hidden;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
