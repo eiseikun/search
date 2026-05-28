@@ -156,9 +156,9 @@ td:nth-last-child(-n+3) {
   /* ===== スマホ用列幅 ===== */
   
   th:nth-child(1), td:nth-child(1) {width: 8px;}/* No */
-  th:nth-child(2), td:nth-child(2) {min-width: 8px;max-width: 8px;}/* 大 */
-  th:nth-child(3), td:nth-child(3) {min-width: 20px;max-width: 20px;}/* パッケージ */
-  th:nth-child(4), td:nth-child(4) {min-width: 20px;max-width: 20px;}/* 小 */
+  th:nth-child(2), td:nth-child(2) {width: 8px;}/* 大 */
+  th:nth-child(3), td:nth-child(3) {min-width: 40px;max-width: 40px;}/* パッケージ */
+  th:nth-child(4), td:nth-child(4) {min-width: 40px;max-width: 40px;}/* 小 */
   th:nth-child(5), td:nth-child(5) {min-width: 20px;max-width: 20px;}/* 名前 */
   th:nth-child(6), td:nth-child(6) {min-width: 20px;max-width: 20px;}/* 作品 */
   th:nth-child(7), td:nth-child(7) {min-width: 20px;max-width: 20px;}/* 部分 */
