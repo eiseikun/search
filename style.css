@@ -167,8 +167,8 @@ td:nth-last-child(-n+3) {
   th:nth-child(10), td:nth-child(10) {min-width: 40px;max-width: 40px;} /* 評価数 */
   th:nth-child(11), td:nth-child(11) {min-width: 40px;max-width: 40px;} /* サイト評価 */
   th:nth-child(12), td:nth-child(12) {min-width: 40px;max-width: 40px;} /* 自分評価 */
-  th:nth-child(13), td:nth-child(13) {min-width: 20px;max-width: 20px;}/* コメント */
-  th:nth-child(14), td:nth-child(14) {min-width: 60px;max-width: 60px;}/* 更新日 */
+  th:nth-child(13), td:nth-child(13) {min-width: 150px;max-width: 150px;}/* コメント */
+  th:nth-child(14), td:nth-child(14) {min-width: 80px;max-width: 80px;}/* 更新日 */
   /* ボタン */
   th:nth-last-child(-n+3),
   td:nth-last-child(-n+3) {
