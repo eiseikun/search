@@ -155,6 +155,63 @@ td:nth-last-child(-n+3) {
   .modal-content {
     margin: 20% auto;
   }
+
+  /* ===== スマホ用列幅 ===== */
+
+  th:nth-child(1), td:nth-child(1) {
+    width: 8px;
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 8px;
+  }
+
+  th:nth-child(3), td:nth-child(3) {
+    min-width: 40px;
+    max-width: 40px;
+  }
+
+  th:nth-child(4), td:nth-child(4) {
+    min-width: 40px;
+    max-width: 40px;
+  }
+
+  /* 名前 */
+  th:nth-child(5), td:nth-child(5) {
+    min-width: 80px;
+    max-width: 80px;
+  }
+
+  /* 作品 */
+  th:nth-child(6), td:nth-child(6) {
+    min-width: 110px;
+    max-width: 110px;
+  }
+
+  /* 部分 */
+  th:nth-child(7), td:nth-child(7) {
+    min-width: 40px;
+    max-width: 40px;
+  }
+
+  /* コメント */
+  th:nth-child(13), td:nth-child(13) {
+    min-width: 90px;
+    max-width: 90px;
+  }
+
+  /* 更新日 */
+  th:nth-child(14), td:nth-child(14) {
+    min-width: 70px;
+    max-width: 70px;
+  }
+
+  /* ボタン */
+  th:nth-last-child(-n+3),
+  td:nth-last-child(-n+3) {
+    min-width: 50px;
+  }
+}
 }
 /* ===== 管理ボタン ===== */
 .header-bar {
