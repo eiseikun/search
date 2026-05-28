@@ -159,7 +159,7 @@ td:nth-last-child(-n+3) {
   th:nth-child(2), td:nth-child(2) {width: 8px;}/* 大 */
   th:nth-child(3), td:nth-child(3) {min-width: 60px;max-width: 60px;}/* パッケージ */
   th:nth-child(4), td:nth-child(4) {min-width: 40px;max-width: 40px;}/* 小 */
-  th:nth-child(5), td:nth-child(5) {min-width: 20px;max-width: 20px;}/* 名前ここから */
+  th:nth-child(5), td:nth-child(5) {min-width: 20px;max-width: 40px;}/* 名前ここから */
   th:nth-child(6), td:nth-child(6) {min-width: 20px;max-width: 20px;}/* 作品 */
   th:nth-child(7), td:nth-child(7) {min-width: 20px;max-width: 20px;}/* 部分 */
   th:nth-child(8), td:nth-child(8) {min-width: 20px;max-width: 20px;}/* URL */
