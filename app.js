@@ -238,7 +238,9 @@ let B = b[subSortKey] ?? "";
 <td class="name-cell" onclick="toggleName(this)">
   ${d.name || ""}
 </td>
-<td>${d.work}</td>
+<td class="work-cell" onclick="toggleWork(this)">
+  ${d.work}
+</td>
 <td>${d.place||"-"}</td>
 <td>
   ${d.url 
@@ -702,6 +704,10 @@ window.toggleName = (el) => {
 };
 // ================= コメント全表示 =================
 window.toggleComment = (el) => {
+  el.classList.toggle("expanded");
+};
+// ================= 作品全表示 =================
+window.toggleWork = (el) => {
   el.classList.toggle("expanded");
 };
 // ================= 管理メニュー =================
