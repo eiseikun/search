@@ -66,6 +66,17 @@ td {
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+/* ===== 作品クリックで展開 ===== */
+.work-cell {
+  cursor: pointer;
+}
+
+.work-cell.expanded {
+  white-space: normal;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
 /* ===== コメントクリックで展開 ===== */
 .comment-cell {
   cursor: pointer;
