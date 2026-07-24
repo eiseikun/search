@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>作品管理</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 <script type="module" src="app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -11,84 +14,135 @@
 
 <body>
 
-<div class="header-bar">
-  <h1>📚 作品管理</h1>
-  <button onclick="toggleManage()" id="manageBtn">⚙️</button>
-</div>
+<div id="toastArea" class="toast-area"></div>
 
+<!-- ================= ヘッダー ================= -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-eyebrow">ARCHIVE LEDGER</span>
+      <h1>作品管理</h1>
+    </div>
+    <button class="icon-btn" id="manageBtn" onclick="toggleManage()" title="データ管理">⚙️</button>
+  </div>
+</header>
 
-<!-- ================= 検索 ================= -->
-<div class="search-bar">
-  <input id="search" placeholder="🔍 検索..." oninput="render()">
+<!-- ================= 検索・操作バー ================= -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="search" placeholder="検索（名前・作品・コメントなど）" oninput="onSearchInput()">
+    <span id="resultCount" class="result-count"></span>
+  </div>
 
-  <!-- ★ここが切り替わる -->
-  <button onclick="toggleDetails()" id="viewBtn">全表示</button>
-  
-
-  <button onclick="openColumnModal()">🖋列表示設定</button>
-  <button onclick="togglePrimaryName()" id="primaryBtn">名前固定OFF</button>
-  <button onclick="openModal()">＋追加</button>
+  <div class="toolbar-actions">
+    <button class="chip-btn" onclick="toggleDetails()" id="viewBtn">全表示</button>
+    <button class="chip-btn" onclick="openColumnModal()">🖋 列設定</button>
+    <button class="chip-btn" id="primaryBtn" onclick="togglePrimaryName()">名前固定OFF</button>
+    <button class="chip-btn accent" onclick="openModal()">＋ 追加</button>
+  </div>
 </div>
 
 <!-- 管理エリア -->
-<div id="manageArea" style="margin:8px 0; display:none;">
-  <input type="file" id="csvFile">
-  <button onclick="importCSV()">CSV取込</button>
-  <button onclick="resetAll()" style="background:red;color:white;">全削除</button>
-  <button onclick="exportCSV()">CSV出力</button>
-</div>
-
-<div class="result-bar">
-  <span id="resultCount"></span>
+<div id="manageArea" class="manage-panel">
+  <p class="manage-title">CSVデータ管理</p>
+  <div class="manage-row">
+    <label class="file-btn">
+      📂 ファイルを選択
+      <input type="file" id="csvFile" accept=".csv" onchange="onCsvFileChange()">
+    </label>
+    <span id="csvFileName" class="file-name">未選択</span>
+  </div>
+  <div class="manage-row">
+    <button class="chip-btn" onclick="importCSV()">⬆ CSV取込</button>
+    <button class="chip-btn" onclick="exportCSV()">⬇ CSV出力</button>
+    <button class="chip-btn danger" onclick="resetAll()">🗑 全削除</button>
+  </div>
 </div>
 
 <!-- ================= 列設定 ================= -->
 <div id="columnModal" class="modal" onclick="closeColumnModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
 
-    <h3>列設定</h3>
+    <h3>表示する列</h3>
 
-    <div class="column-grid">
-      <label><input type="checkbox" data-col="0">No</label>
-      <label><input type="checkbox" data-col="1">大</label>
-      <label><input type="checkbox" data-col="2">パッケージ</label>
-      <label><input type="checkbox" data-col="3">小</label>
-      <label><input type="checkbox" data-col="4">名前</label>
-      <label><input type="checkbox" data-col="5">作品</label>
-      <label><input type="checkbox" data-col="6">部分</label>
-      <label><input type="checkbox" data-col="7">URL</label>
-      <label><input type="checkbox" data-col="8">⭐</label>
-      <label><input type="checkbox" data-col="9">評価数</label>
-      <label><input type="checkbox" data-col="10">サイト</label>
-      <label><input type="checkbox" data-col="11">自分評価</label>
-      <label><input type="checkbox" data-col="12">コメント</label>
-      <label><input type="checkbox" data-col="13">更新日</label>
+    <div class="column-actions">
+      <button class="text-btn" onclick="setAllColumns(true)">すべて表示</button>
+      <button class="text-btn" onclick="setAllColumns(false)">すべて非表示</button>
     </div>
 
-    <button onclick="closeColumnModal()">閉じる</button>
+    <div class="column-grid">
+      <label class="col-chip"><input type="checkbox" data-col="0">No</label>
+      <label class="col-chip"><input type="checkbox" data-col="1">大</label>
+      <label class="col-chip"><input type="checkbox" data-col="2">パッケージ</label>
+      <label class="col-chip"><input type="checkbox" data-col="3">小</label>
+      <label class="col-chip"><input type="checkbox" data-col="4">名前</label>
+      <label class="col-chip"><input type="checkbox" data-col="5">作品</label>
+      <label class="col-chip"><input type="checkbox" data-col="6">部分</label>
+      <label class="col-chip"><input type="checkbox" data-col="7">URL</label>
+      <label class="col-chip"><input type="checkbox" data-col="8">⭐</label>
+      <label class="col-chip"><input type="checkbox" data-col="9">評価数</label>
+      <label class="col-chip"><input type="checkbox" data-col="10">サイト評価</label>
+      <label class="col-chip"><input type="checkbox" data-col="11">自分評価</label>
+      <label class="col-chip"><input type="checkbox" data-col="12">コメント</label>
+      <label class="col-chip"><input type="checkbox" data-col="13">更新日</label>
+    </div>
+
+    <button class="chip-btn accent full" onclick="closeColumnModal()">閉じる</button>
   </div>
 </div>
 
-<!-- ================= 追加 ================= -->
+<!-- ================= 追加／編集 ================= -->
 <div id="modal" class="modal" onclick="closeModal()">
   <div class="modal-content" onclick="event.stopPropagation()">
 
-    <input id="main" placeholder="大分類">
-    <input id="package" placeholder="パッケージ">
-    <input id="sub" placeholder="小分類">
+    <h3 id="modalTitle">新しい作品を追加</h3>
 
-    <input id="name" placeholder="名前">
-    <input id="work" placeholder="作品">
-    <input id="place" placeholder="部分">
+    <div class="form-section">
+      <p class="form-section-title">分類</p>
+      <div class="form-grid form-grid-3">
+        <label class="field"><span>大分類 <em>必須</em></span><input id="main" type="number" placeholder="例）1"></label>
+        <label class="field"><span>パッケージ</span><input id="package" placeholder="パッケージ名"></label>
+        <label class="field"><span>小分類</span><input id="sub" placeholder="例）1-2"></label>
+      </div>
+    </div>
 
-    <input id="url" placeholder="URL">
-    <input id="fav" placeholder="⭐">
-    <input id="ratingCount" placeholder="評価数">
-    <input id="siteRating" placeholder="サイト評価">
-    <input id="selfRating" placeholder="自分評価">
-    <input id="comment" placeholder="コメント">
+    <div class="form-section">
+      <p class="form-section-title">内容</p>
+      <div class="form-grid form-grid-2">
+        <label class="field"><span>名前</span><input id="name" placeholder="人物・シリーズ名など"></label>
+        <label class="field"><span>作品 <em>必須</em></span><input id="work" placeholder="作品タイトル"></label>
+        <label class="field"><span>部分</span><input id="place" placeholder="巻・話数など"></label>
+        <label class="field"><span>URL</span><input id="url" type="url" placeholder="https://"></label>
+      </div>
+    </div>
 
-    <button onclick="addItem()">保存</button>
+    <div class="form-section">
+      <p class="form-section-title">評価</p>
+      <div class="form-grid form-grid-4">
+        <label class="field"><span>⭐</span><input id="fav" type="number" placeholder="0"></label>
+        <label class="field"><span>評価数</span><input id="ratingCount" type="number" placeholder="0"></label>
+        <label class="field"><span>サイト評価</span><input id="siteRating" type="number" placeholder="0"></label>
+        <label class="field"><span>自分評価</span><input id="selfRating" type="number" placeholder="0"></label>
+      </div>
+      <label class="field"><span>コメント</span><textarea id="comment" rows="2" placeholder="メモ・感想など"></textarea></label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="chip-btn ghost" onclick="closeModal()">キャンセル</button>
+      <button class="chip-btn accent" onclick="addItem()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 確認モーダル ================= -->
+<div id="confirmModal" class="modal" onclick="resolveConfirm(false)">
+  <div class="modal-content modal-confirm" onclick="event.stopPropagation()">
+    <p id="confirmMessage" class="confirm-message"></p>
+    <div class="modal-actions">
+      <button class="chip-btn ghost" onclick="resolveConfirm(false)">キャンセル</button>
+      <button class="chip-btn danger" id="confirmOkBtn" onclick="resolveConfirm(true)">実行する</button>
+    </div>
   </div>
 </div>
 
@@ -97,29 +151,32 @@
 <table>
 <thead>
 <tr>
-<th onclick="sortBy('no')">No</th>
-<th onclick="sortBy('main')">大</th>
-<th onclick="sortBy('package')">パッケージ</th>
-<th onclick="sortBy('sub')">小</th>
-<th onclick="sortBy('name')">名前</th>
-<th onclick="sortBy('work')">作品</th>
-<th onclick="sortBy('place')">部分</th>
-<th onclick="sortBy('url')">URL</th>
-<th onclick="sortBy('fav')">⭐</th>
-<th onclick="sortBy('ratingCount')">評価数</th>
-<th onclick="sortBy('siteRating')">サイト</th>
-<th onclick="sortBy('selfRating')">自分評価</th>
-<th onclick="sortBy('comment')">コメント</th>
-<th onclick="sortBy('date')">更新日</th>
-
-<th>編集</th>
-<th>削除</th>
+<th onclick="sortBy('no')" data-col="0">No<span class="sort-indicator" data-key="no"></span></th>
+<th onclick="sortBy('main')" data-col="1">大<span class="sort-indicator" data-key="main"></span></th>
+<th onclick="sortBy('package')" data-col="2">パッケージ<span class="sort-indicator" data-key="package"></span></th>
+<th onclick="sortBy('sub')" data-col="3">小<span class="sort-indicator" data-key="sub"></span></th>
+<th onclick="sortBy('name')" data-col="4">名前<span class="sort-indicator" data-key="name"></span></th>
+<th onclick="sortBy('work')" data-col="5">作品<span class="sort-indicator" data-key="work"></span></th>
+<th onclick="sortBy('place')" data-col="6">部分<span class="sort-indicator" data-key="place"></span></th>
+<th onclick="sortBy('url')" data-col="7">URL<span class="sort-indicator" data-key="url"></span></th>
+<th onclick="sortBy('fav')" data-col="8">⭐<span class="sort-indicator" data-key="fav"></span></th>
+<th onclick="sortBy('ratingCount')" data-col="9">評価数<span class="sort-indicator" data-key="ratingCount"></span></th>
+<th onclick="sortBy('siteRating')" data-col="10">サイト<span class="sort-indicator" data-key="siteRating"></span></th>
+<th onclick="sortBy('selfRating')" data-col="11">自分評価<span class="sort-indicator" data-key="selfRating"></span></th>
+<th onclick="sortBy('comment')" data-col="12">コメント<span class="sort-indicator" data-key="comment"></span></th>
+<th onclick="sortBy('date')" data-col="13">更新日<span class="sort-indicator" data-key="date"></span></th>
+<th data-col="14">編集</th>
+<th data-col="15">削除</th>
 </tr>
 </thead>
 
-<tbody id="list"></tbody>
+<tbody id="list">
+<tr class="state-row"><td colspan="16">読み込み中…</td></tr>
+</tbody>
 </table>
 </div>
+
+<button class="fab" onclick="openModal()" title="追加">＋</button>
 
 </body>
 </html>
