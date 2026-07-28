@@ -373,22 +373,24 @@ window.toggleMultiAddMode = () => {
 
 // ================= ヘッダークリックでソート =================
 // 通常クリック：その列だけで単独ソート（既存の条件はリセット）
-// Shift+クリック：既存の条件を残したまま、この列を段階として追加／切替
+// Shift+クリック／段階追加モード：既存の条件を残したまま、この列を段階として追加／切替
+// 「名前」列は初期状態で「同じ名前の件数が多い順→少ない順」の切替になる
 window.sortBy = (key, evt) => {
   const shift = !!(evt && evt.shiftKey) || multiAddMode;
+  const defaultGroup = key === "name"; // 名前は件数グループ化を既定にする
 
   if (!shift) {
-    if (sortLevels.length === 1 && sortLevels[0].key === key && !sortLevels[0].group) {
+    if (sortLevels.length === 1 && sortLevels[0].key === key) {
       sortLevels[0].asc = !sortLevels[0].asc;
     } else {
-      sortLevels = [{ key, asc: true, group: false }];
+      sortLevels = [{ key, asc: true, group: defaultGroup }];
     }
   } else {
     const existing = sortLevels.find(l => l.key === key);
     if (existing) {
       existing.asc = !existing.asc;
     } else {
-      sortLevels.push({ key, asc: true, group: false });
+      sortLevels.push({ key, asc: true, group: defaultGroup });
     }
   }
 
@@ -412,7 +414,7 @@ window.closeSortModal = () => {
 window.addSortLevel = () => {
   const usedKeys = workingLevels.map(l => l.key);
   const next = columnDefs.find(c => !usedKeys.includes(c.key)) || columnDefs[0];
-  workingLevels.push({ key: next.key, asc: true, group: false });
+  workingLevels.push({ key: next.key, asc: true, group: next.key === "name" });
   renderSortModal();
 };
 
@@ -430,6 +432,8 @@ window.moveSortLevel = (i, dir) => {
 
 window.updateSortLevelKey = (i, key) => {
   workingLevels[i].key = key;
+  if (key === "name") workingLevels[i].group = true;
+  renderSortModal();
 };
 
 window.toggleSortLevelDir = (i) => {
