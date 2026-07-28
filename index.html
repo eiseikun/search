@@ -100,6 +100,17 @@
     <h3>並び替え設定</h3>
     <p class="modal-hint">上から優先順位順に比較されます。同じ値なら次の条件で比較します。表の見出しをタップすると単独ソート、ツールバーの「🔗 段階追加」をONにしてから見出しをタップすると条件を追加できます（PCではShift+クリックでも可）。</p>
 
+    <p class="form-section-title">クイック並び替え</p>
+    <div class="preset-row">
+      <button class="chip-btn" onclick="applySortPreset(0)">更新日：新しい順</button>
+      <button class="chip-btn" onclick="applySortPreset(1)">名前：多い順</button>
+      <button class="chip-btn" onclick="applySortPreset(2)">⭐：高い順</button>
+      <button class="chip-btn" onclick="applySortPreset(3)">自分評価：高い順</button>
+      <button class="chip-btn" onclick="applySortPreset(4)">No：登録順</button>
+    </div>
+
+    <p class="form-section-title">詳細な条件</p>
+
     <div id="sortLevelList" class="sort-level-list"></div>
 
     <button class="text-btn" onclick="addSortLevel()">＋ 条件を追加</button>
