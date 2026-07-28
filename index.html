@@ -98,7 +98,8 @@
   <div class="modal-content" onclick="event.stopPropagation()">
 
     <h3>並び替え設定</h3>
-    <p class="modal-hint">上から優先順位順に比較されます。同じ値なら次の条件で比較します。表の見出しをタップすると単独ソート、ツールバーの「🔗 段階追加」をONにしてから見出しをタップすると条件を追加できます（PCではShift+クリックでも可）。</p>
+    <p class="modal-hint">上の条件から順に比較し、同じ値のときだけ次の条件で比較します。</p>
+    <p id="sortSummary" class="sort-summary"></p>
 
     <p class="form-section-title">クイック並び替え</p>
     <div class="preset-row">
@@ -113,7 +114,12 @@
 
     <div id="sortLevelList" class="sort-level-list"></div>
 
-    <button class="text-btn" onclick="addSortLevel()">＋ 条件を追加</button>
+    <div class="sort-list-actions">
+      <button class="text-btn" onclick="addSortLevel()">＋ 条件を追加</button>
+      <button class="text-btn muted" onclick="resetSortLevels()">既定（No順）に戻す</button>
+    </div>
+
+    <p class="modal-hint">表の見出しをタップすると単独ソート、ツールバーの「🔗 段階追加」をONにしてから見出しをタップすると条件を追加できます（PCではShift+クリックでも可）。</p>
 
     <div class="modal-actions">
       <button class="chip-btn ghost" onclick="closeSortModal()">閉じる</button>
