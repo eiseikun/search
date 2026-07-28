@@ -366,6 +366,28 @@ function multiCompare(a, b){
   return (a.no ?? 0) - (b.no ?? 0);
 }
 
+// ================= 並び替え条件を文章化 =================
+function levelLabel(level){
+  const def = columnDefs.find(c => c.key === level.key);
+  const name = def ? def.label : level.key;
+
+  if (level.group) return `${name}(${level.asc ? "多い順" : "少ない順"})`;
+  if (level.key === "date") return `${name}(${level.asc ? "古い順" : "新しい順"})`;
+  return `${name}(${level.asc ? "昇順" : "降順"})`;
+}
+function describeSortLevels(levels){
+  return levels.map(levelLabel).join(" → ");
+}
+
+// ================= 並び替えボタンの表示を最新の状態に同期 =================
+function updateSortButtonLabel(){
+  const btn = document.getElementById("sortLevelBtn");
+  if (!btn) return;
+  const desc = describeSortLevels(sortLevels);
+  btn.textContent = "⇅ " + desc;
+  btn.title = "並び替え設定：" + desc;
+}
+
 // ================= ソート表示矢印 =================
 function updateSortIndicators(){
   document.querySelectorAll(".sort-indicator").forEach(el => el.textContent = "");
@@ -378,6 +400,8 @@ function updateSortIndicators(){
     const groupMark = level.group ? "Ⓖ" : "";
     el.textContent = arrow + order + groupMark;
   });
+
+  updateSortButtonLabel();
 }
 
 // ================= 段階追加モード（スマホ用） =================
@@ -442,6 +466,11 @@ window.removeSortLevel = (i) => {
   renderSortModal();
 };
 
+window.resetSortLevels = () => {
+  workingLevels = [{ key: "no", asc: true, group: false }];
+  renderSortModal();
+};
+
 window.moveSortLevel = (i, dir) => {
   const j = i + dir;
   if (j < 0 || j >= workingLevels.length) return;
@@ -462,6 +491,7 @@ window.toggleSortLevelDir = (i) => {
 
 window.toggleSortLevelGroup = (i) => {
   workingLevels[i].group = !workingLevels[i].group;
+  renderSortModal();
 };
 
 window.applySortLevels = () => {
@@ -473,29 +503,50 @@ window.applySortLevels = () => {
   render();
 };
 
+// 選択肢をカテゴリ分けして選びやすくする
+const columnGroups = [
+  { label: "分類", keys: ["no", "main", "package", "sub"] },
+  { label: "内容", keys: ["name", "work", "place", "url", "comment"] },
+  { label: "評価・日付", keys: ["fav", "ratingCount", "siteRating", "selfRating", "date"] },
+];
+
 function renderSortModal(){
+  const summary = document.getElementById("sortSummary");
+  summary.textContent = workingLevels.length
+    ? "現在の並び順： " + describeSortLevels(workingLevels)
+    : "並び替え条件がありません（登録順で表示されます）";
+
   const container = document.getElementById("sortLevelList");
 
   if (!workingLevels.length) {
-    container.innerHTML = `<p class="empty-hint">条件がありません。「＋ 条件を追加」から作成してください。</p>`;
+    container.innerHTML = `<p class="empty-hint">「＋ 条件を追加」から作成してください。</p>`;
     return;
   }
 
   container.innerHTML = workingLevels.map((level, i) => `
     <div class="sort-level-row">
-      <span class="sort-level-badge">${i + 1}</span>
-      <select onchange="updateSortLevelKey(${i}, this.value)">
-        ${columnDefs.map(c => `<option value="${c.key}" ${c.key === level.key ? "selected" : ""}>${c.label}</option>`).join("")}
-      </select>
-      <button class="chip-btn" onclick="toggleSortLevelDir(${i})">${level.asc ? "▲ 昇順/多い順" : "▼ 降順/少ない順"}</button>
-      <label class="sort-group-toggle">
-        <input type="checkbox" ${level.group ? "checked" : ""} onchange="toggleSortLevelGroup(${i})"> 件数でグループ化
-      </label>
-      <div class="sort-level-actions">
-        <button class="icon-mini" onclick="moveSortLevel(${i},-1)" ${i === 0 ? "disabled" : ""} title="上へ">↑</button>
-        <button class="icon-mini" onclick="moveSortLevel(${i},1)" ${i === workingLevels.length - 1 ? "disabled" : ""} title="下へ">↓</button>
-        <button class="icon-mini danger" onclick="removeSortLevel(${i})" title="削除">✕</button>
+      <div class="sort-level-main">
+        <span class="sort-level-badge">${i + 1}</span>
+        <select onchange="updateSortLevelKey(${i}, this.value)">
+          ${columnGroups.map(g => `
+            <optgroup label="${g.label}">
+              ${g.keys.map(k => {
+                const c = columnDefs.find(cc => cc.key === k);
+                return `<option value="${c.key}" ${c.key === level.key ? "selected" : ""}>${c.label}</option>`;
+              }).join("")}
+            </optgroup>`).join("")}
+        </select>
+        <div class="sort-level-actions">
+          <button class="icon-mini" onclick="moveSortLevel(${i},-1)" ${i === 0 ? "disabled" : ""} title="上へ">↑</button>
+          <button class="icon-mini" onclick="moveSortLevel(${i},1)" ${i === workingLevels.length - 1 ? "disabled" : ""} title="下へ">↓</button>
+          <button class="icon-mini danger" onclick="removeSortLevel(${i})" title="削除">✕</button>
+        </div>
       </div>
+      <button class="chip-btn full-mobile" onclick="toggleSortLevelDir(${i})">${level.asc ? "▲ 昇順 / 多い順" : "▼ 降順 / 少ない順"}</button>
+      <label class="sort-group-toggle">
+        <input type="checkbox" ${level.group ? "checked" : ""} onchange="toggleSortLevelGroup(${i})">
+        <span>同じ値をまとめる（例：同じ名前をひとかたまりにして、件数の多い順に並べる）</span>
+      </label>
     </div>
   `).join("");
 }
@@ -759,6 +810,9 @@ window.toggleManage = () => {
   const isOpen = area.style.display === "block";
   area.style.display = isOpen ? "none" : "block";
 };
+
+// ================= 初期表示 =================
+updateSortButtonLabel();
 
 // ================= スクロールロック =================
 function lockScroll(){ document.body.style.overflow = "hidden"; }
