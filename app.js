@@ -281,22 +281,22 @@ window.render = function(){
   data.forEach(d => {
     html += `
 <tr>
-<td data-label="No">${d.no ?? "-"}</td>
-<td data-label="大">${escapeHtml(d.main)}</td>
-<td data-label="パッケージ">${escapeHtml(d.package || "")}</td>
-<td data-label="小">${escapeHtml(d.sub)}</td>
-<td data-label="名前" class="name-cell" onclick="toggleName(this)">${escapeHtml(d.name || "")}</td>
-<td data-label="作品" class="work-cell" onclick="toggleWork(this)">${escapeHtml(d.work)}</td>
-<td data-label="部分">${escapeHtml(d.place || "-")}</td>
-<td data-label="URL">${d.url ? `<a class="link-btn" href="${escapeAttr(d.url)}" target="_blank" rel="noopener">🔗 開く</a>` : "-"}</td>
-<td data-label="⭐">${rateBadge(d.fav)}</td>
-<td data-label="評価数">${rateBadge(d.ratingCount)}</td>
-<td data-label="サイト評価">${rateBadge(d.siteRating)}</td>
-<td data-label="自分評価">${rateBadge(d.selfRating)}</td>
-<td data-label="コメント" class="comment-cell" onclick="toggleComment(this)">${escapeHtml(d.comment ?? "")}</td>
-<td data-label="更新日">${escapeHtml(d.date)}</td>
-<td class="card-actions"><button class="row-btn" onclick="startEdit('${d.id}','${escapeAttr(d.main)}','${escapeAttr(d.package)}','${escapeAttr(d.sub)}','${escapeAttr(d.name)}','${escapeAttr(d.work)}','${escapeAttr(d.place)}','${escapeAttr(d.url)}','${escapeAttr(d.fav)}','${escapeAttr(d.ratingCount)}','${escapeAttr(d.siteRating)}','${escapeAttr(d.selfRating)}','${escapeAttr(d.comment)}')">✏️ 編集</button></td>
-<td class="card-actions"><button class="row-btn danger" onclick="remove('${d.id}')">🗑 削除</button></td>
+<td>${d.no ?? "-"}</td>
+<td>${escapeHtml(d.main)}</td>
+<td>${escapeHtml(d.package || "")}</td>
+<td>${escapeHtml(d.sub)}</td>
+<td class="name-cell" onclick="toggleName(this)">${escapeHtml(d.name || "")}</td>
+<td class="work-cell" onclick="toggleWork(this)">${escapeHtml(d.work)}</td>
+<td>${escapeHtml(d.place || "-")}</td>
+<td>${d.url ? `<a class="link-btn" href="${escapeAttr(d.url)}" target="_blank" rel="noopener">🔗</a>` : "-"}</td>
+<td>${rateBadge(d.fav)}</td>
+<td>${rateBadge(d.ratingCount)}</td>
+<td>${rateBadge(d.siteRating)}</td>
+<td>${rateBadge(d.selfRating)}</td>
+<td class="comment-cell" onclick="toggleComment(this)">${escapeHtml(d.comment ?? "")}</td>
+<td>${escapeHtml(d.date)}</td>
+<td><button class="row-btn" onclick="startEdit('${d.id}','${escapeAttr(d.main)}','${escapeAttr(d.package)}','${escapeAttr(d.sub)}','${escapeAttr(d.name)}','${escapeAttr(d.work)}','${escapeAttr(d.place)}','${escapeAttr(d.url)}','${escapeAttr(d.fav)}','${escapeAttr(d.ratingCount)}','${escapeAttr(d.siteRating)}','${escapeAttr(d.selfRating)}','${escapeAttr(d.comment)}')">編集</button></td>
+<td><button class="row-btn danger" onclick="remove('${d.id}')">削除</button></td>
 </tr>`;
   });
 
