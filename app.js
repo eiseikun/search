@@ -295,8 +295,8 @@ window.render = function(){
 <td>${rateBadge(d.selfRating)}</td>
 <td class="comment-cell" onclick="toggleComment(this)">${escapeHtml(d.comment ?? "")}</td>
 <td>${escapeHtml(d.date)}</td>
-<td><button class="row-btn" onclick="startEdit('${d.id}','${escapeAttr(d.main)}','${escapeAttr(d.package)}','${escapeAttr(d.sub)}','${escapeAttr(d.name)}','${escapeAttr(d.work)}','${escapeAttr(d.place)}','${escapeAttr(d.url)}','${escapeAttr(d.fav)}','${escapeAttr(d.ratingCount)}','${escapeAttr(d.siteRating)}','${escapeAttr(d.selfRating)}','${escapeAttr(d.comment)}')">編集</button></td>
-<td><button class="row-btn danger" onclick="remove('${d.id}')">削除</button></td>
+<td><button class="row-btn" onclick="startEdit('${d.id}','${escapeAttr(d.main)}','${escapeAttr(d.package)}','${escapeAttr(d.sub)}','${escapeAttr(d.name)}','${escapeAttr(d.work)}','${escapeAttr(d.place)}','${escapeAttr(d.url)}','${escapeAttr(d.fav)}','${escapeAttr(d.ratingCount)}','${escapeAttr(d.siteRating)}','${escapeAttr(d.selfRating)}','${escapeAttr(d.comment)}')">✎<span class="btn-label">編集</span></button></td>
+<td><button class="row-btn danger" onclick="remove('${d.id}')">🗑<span class="btn-label">削除</span></button></td>
 </tr>`;
   });
 
