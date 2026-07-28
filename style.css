@@ -305,6 +305,15 @@ th:hover{ color: var(--brass); }
   padding: 28px 10px;
   color: var(--ink-faint);
   font-style: italic;
+  /* colspanで全幅表示するため、固定列用の指定を打ち消す */
+  position: static !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  left: auto !important;
+  right: auto !important;
 }
 
 /* ===== 展開セル ===== */
@@ -340,11 +349,15 @@ th:hover{ color: var(--brass); }
 /* ===== 行内アクション ===== */
 tr.active-row{ background: var(--teal-bg) !important; }
 .row-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border: 1px solid var(--line);
   background: var(--panel-alt);
   color: var(--ink-dim);
   border-radius: var(--radius-s);
-  padding: 8px 11px;
+  padding: 7px 9px;
   font-size: 12px;
   min-height: 32px;
   cursor: pointer;
@@ -366,8 +379,32 @@ th:nth-child(10), td:nth-child(10) { width: 55px; }
 th:nth-child(11), td:nth-child(11) { width: 55px; }
 th:nth-child(12), td:nth-child(12) { width: 55px; }
 th:nth-child(13), td:nth-child(13) { min-width: 150px; max-width: 150px; }
-th:nth-child(14), td:nth-child(14) { min-width: 70px; }
-th:nth-last-child(-n+2), td:nth-last-child(-n+2){ min-width: 62px; }
+th:nth-last-child(-n+2), td:nth-last-child(-n+2){ width: 84px; min-width: 84px; max-width: 84px; }
+
+/* ===== 固定列（横スクロールしても No・編集・削除 が常に見える） ===== */
+th:nth-child(1), td:nth-child(1),
+th:nth-last-child(-n+2), td:nth-last-child(-n+2){
+  position: sticky;
+  z-index: 1;
+}
+th:nth-child(1), th:nth-last-child(-n+2){ z-index: 3; }
+
+th:nth-child(1), td:nth-child(1){ left: 0; }
+th:nth-last-child(1), td:nth-last-child(1){ right: 0; }
+th:nth-last-child(2), td:nth-last-child(2){ right: 84px; }
+
+/* スクロール中の内容が透けないよう、固定列には行と同じ背景色を明示的に指定 */
+td:nth-child(1), td:nth-last-child(-n+2){ background: var(--panel); }
+tbody tr:nth-child(even) td:nth-child(1),
+tbody tr:nth-child(even) td:nth-last-child(-n+2){ background: var(--panel-alt); }
+tbody tr:hover td:nth-child(1),
+tbody tr:hover td:nth-last-child(-n+2){ background: var(--brass-bg); }
+tr.active-row td:nth-child(1),
+tr.active-row td:nth-last-child(-n+2){ background: var(--teal-bg) !important; }
+
+/* 固定列の境界がわかるように影を付ける */
+th:nth-child(1), td:nth-child(1){ box-shadow: 2px 0 4px -2px rgba(0,0,0,.18); }
+th:nth-last-child(2), td:nth-last-child(2){ box-shadow: -2px 0 4px -2px rgba(0,0,0,.18); }
 
 /* ===================== モーダル ===================== */
 .modal{
@@ -636,7 +673,9 @@ th:nth-last-child(-n+2), td:nth-last-child(-n+2){ min-width: 62px; }
   .toolbar-actions .chip-btn.accent{ display: none; }
   .fab{ display: block; }
   .form-grid-3, .form-grid-4{ grid-template-columns: 1fr 1fr; }
-  th, td{ padding: 6px 5px; }
+
+  /* 1行あたりの縦幅をできるだけ詰める（横スクロールは許容） */
+  th, td{ padding: 4px 6px; line-height: 1.3; }
   .table-wrap{ height: calc(100dvh - 190px); }
 
   th:nth-child(3), td:nth-child(3) { min-width: 70px; max-width: 70px; }
@@ -644,8 +683,17 @@ th:nth-last-child(-n+2), td:nth-last-child(-n+2){ min-width: 62px; }
   th:nth-child(6), td:nth-child(6) { min-width: 120px; max-width: 120px; }
   th:nth-child(13), td:nth-child(13) { min-width: 130px; max-width: 130px; }
 
+  /* 編集・削除はアイコンのみにして列幅と行の高さを縮める */
+  th:nth-last-child(-n+2), td:nth-last-child(-n+2){ width: 40px; min-width: 40px; max-width: 40px; }
+  th:nth-last-child(2), td:nth-last-child(2){ right: 40px; }
+  .row-btn{ padding: 5px; min-height: 26px; min-width: 26px; font-size: 13px; }
+  .row-btn .btn-label{ display: none; }
+
+  /* 評価バッジも少し小さく */
+  .rate-badge{ min-width: 18px; padding: 1px 4px; font-size: 11px; }
+
   /* タップ領域を確保（見出し・チップ・チェックボックス） */
-  th{ padding: 10px 6px; }
+  th{ padding: 8px 6px; }
   .chip-btn{ padding: 10px 14px; min-height: 40px; }
   .icon-btn{ min-width: 40px; min-height: 40px; }
   .col-chip{ padding: 10px; }
