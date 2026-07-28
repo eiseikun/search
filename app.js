@@ -20,11 +20,41 @@ let loaded = false;
 let editId = null;
 
 let columnMode = false;
-let currentSort = "no";
-let sortAsc = true;
-let primarySort = null; // 名前固定
-let nameSortAsc = true;
-let subSortKey = "no";
+
+// ================= 並び替え（多段階ソート） =================
+// sortLevels: [{key, asc, group}, ...] 上ほど優先度が高い
+// group=true の場合、その値の出現回数でグループ化してから並べる（旧「名前固定」を一般化）
+const columnDefs = [
+  { key: "no", label: "No" },
+  { key: "main", label: "大" },
+  { key: "package", label: "パッケージ" },
+  { key: "sub", label: "小" },
+  { key: "name", label: "名前" },
+  { key: "work", label: "作品" },
+  { key: "place", label: "部分" },
+  { key: "url", label: "URL" },
+  { key: "fav", label: "⭐" },
+  { key: "ratingCount", label: "評価数" },
+  { key: "siteRating", label: "サイト評価" },
+  { key: "selfRating", label: "自分評価" },
+  { key: "comment", label: "コメント" },
+  { key: "date", label: "更新日" },
+];
+
+function loadSortLevels(){
+  try {
+    const v = JSON.parse(localStorage.getItem("sortLevels") || "null");
+    if (Array.isArray(v) && v.length) return v;
+  } catch (e) { /* ignore */ }
+  return [{ key: "no", asc: true, group: false }];
+}
+function saveSortLevels(){
+  localStorage.setItem("sortLevels", JSON.stringify(sortLevels));
+}
+
+let sortLevels = loadSortLevels();
+let workingLevels = []; // 並び替えモーダル編集中の一時データ
+let multiAddMode = false; // ON中は見出しタップで段階追加（スマホ用のShift+クリック代替）
 
 let searchTimer = null;
 let confirmResolver = null;
@@ -206,72 +236,8 @@ window.render = function(){
     )
   );
 
-  // ソート
-  data = data.sort((a, b) => {
-
-    // 👑 名前固定ONのとき（最優先）
-    if (primarySort === "name") {
-
-      const countMap = {};
-      lastSnapshot.forEach(d => {
-        const n = d.name || "";
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-
-      const countA = countMap[a.name || ""] || 0;
-      const countB = countMap[b.name || ""] || 0;
-
-      if (countA !== countB) {
-        return nameSortAsc ? countB - countA : countA - countB;
-      }
-
-      const nameCompare = String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
-      if (nameCompare !== 0) return nameCompare;
-
-      let A = a[subSortKey] ?? "";
-      let B = b[subSortKey] ?? "";
-      const numA = Number(A);
-      const numB = Number(B);
-      const isNum = !isNaN(numA) && !isNaN(numB);
-
-      if (isNum) return sortAsc ? numA - numB : numB - numA;
-      return String(A).localeCompare(String(B), "ja", { numeric: true });
-    }
-
-    // 👤 名前単体ソート
-    if (currentSort === "name") {
-      const countMap = {};
-      lastSnapshot.forEach(d => {
-        const n = d.name || "";
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-
-      const countA = countMap[a.name || ""] || 0;
-      const countB = countMap[b.name || ""] || 0;
-
-      if (countA !== countB) {
-        return nameSortAsc ? countB - countA : countA - countB;
-      }
-      return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
-    }
-
-    // 通常ソート
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
-    const numA = Number(A);
-    const numB = Number(B);
-    const isNum = !isNaN(numA) && !isNaN(numB);
-
-    if (isNum) return sortAsc ? numA - numB : numB - numA;
-
-    if (currentSort === "date") {
-      return sortAsc ? new Date(A) - new Date(B) : new Date(B) - new Date(A);
-    }
-
-    return sortAsc
-      ? String(A).localeCompare(String(B), "ja", { numeric: true })
-      : String(B).localeCompare(String(A), "ja", { numeric: true });
-  });
+  // 並び替え（多段階）
+  data = data.sort(multiCompare);
 
   document.getElementById("resultCount").textContent = loaded ? `${data.length}件` : "";
 
@@ -330,65 +296,186 @@ window.render = function(){
   updateSortIndicators();
 };
 
+// ================= 値の比較（数値／日付／文字列を自動判定） =================
+function compareValues(A, B, key, asc){
+  const numA = Number(A);
+  const numB = Number(B);
+  const isNum = !isNaN(numA) && !isNaN(numB);
+
+  if (isNum) return asc ? numA - numB : numB - numA;
+
+  if (key === "date") {
+    return asc ? new Date(A) - new Date(B) : new Date(B) - new Date(A);
+  }
+
+  return asc
+    ? String(A).localeCompare(String(B), "ja", { numeric: true })
+    : String(B).localeCompare(String(A), "ja", { numeric: true });
+}
+
+// ================= 1つの並び替え条件で比較 =================
+function levelCompare(a, b, level){
+  if (level.group) {
+    // 値の出現回数でグループ化（例：同じ「名前」をまとめる）
+    const countMap = {};
+    lastSnapshot.forEach(d => {
+      const v = d[level.key] ?? "";
+      countMap[v] = (countMap[v] || 0) + 1;
+    });
+
+    const va = a[level.key] ?? "";
+    const vb = b[level.key] ?? "";
+    const countA = countMap[va] || 0;
+    const countB = countMap[vb] || 0;
+
+    if (countA !== countB) {
+      return level.asc ? countB - countA : countA - countB; // asc=多い順
+    }
+    // 同じ回数ならグループが崩れないよう値そのもので固定
+    return compareValues(va, vb, level.key, true);
+  }
+
+  return compareValues(a[level.key] ?? "", b[level.key] ?? "", level.key, level.asc);
+}
+
+// ================= 多段階ソート（優先度順に比較） =================
+function multiCompare(a, b){
+  for (const level of sortLevels) {
+    const c = levelCompare(a, b, level);
+    if (c !== 0) return c;
+  }
+  return (a.no ?? 0) - (b.no ?? 0);
+}
+
 // ================= ソート表示矢印 =================
 function updateSortIndicators(){
   document.querySelectorAll(".sort-indicator").forEach(el => el.textContent = "");
 
-  if (primarySort === "name") {
-    const el = document.querySelector(`.sort-indicator[data-key="${subSortKey}"]`);
-    if (el) el.textContent = sortAsc ? "▲" : "▼";
-    return;
-  }
-
-  const key = currentSort === "name" ? "name" : currentSort;
-  const asc = currentSort === "name" ? nameSortAsc : sortAsc;
-  const el = document.querySelector(`.sort-indicator[data-key="${key}"]`);
-  if (el) el.textContent = asc ? "▲" : "▼";
+  sortLevels.forEach((level, i) => {
+    const el = document.querySelector(`.sort-indicator[data-key="${level.key}"]`);
+    if (!el) return;
+    const arrow = level.asc ? "▲" : "▼";
+    const order = sortLevels.length > 1 ? String(i + 1) : "";
+    const groupMark = level.group ? "Ⓖ" : "";
+    el.textContent = arrow + order + groupMark;
+  });
 }
 
-// ================= ソート =================
-window.sortBy = (key) => {
+// ================= 段階追加モード（スマホ用） =================
+// ONの間は見出しタップが「追加」として扱われる（Shift+クリックと同じ効果）
+window.toggleMultiAddMode = () => {
+  multiAddMode = !multiAddMode;
+  const btn = document.getElementById("multiAddBtn");
+  btn.textContent = multiAddMode ? "🔗 段階追加 ON" : "🔗 段階追加";
+  btn.classList.toggle("active", multiAddMode);
+  showToast(multiAddMode ? "見出しをタップして条件を追加できます" : "通常モードに戻りました");
+};
 
-  if (key === "name") {
-    if (currentSort === "name") {
-      nameSortAsc = !nameSortAsc;
+// ================= ヘッダークリックでソート =================
+// 通常クリック：その列だけで単独ソート（既存の条件はリセット）
+// Shift+クリック：既存の条件を残したまま、この列を段階として追加／切替
+window.sortBy = (key, evt) => {
+  const shift = !!(evt && evt.shiftKey) || multiAddMode;
+
+  if (!shift) {
+    if (sortLevels.length === 1 && sortLevels[0].key === key && !sortLevels[0].group) {
+      sortLevels[0].asc = !sortLevels[0].asc;
     } else {
-      currentSort = "name";
-      nameSortAsc = true;
+      sortLevels = [{ key, asc: true, group: false }];
     }
-    render();
-    return;
-  }
-
-  if (primarySort === "name") {
-    if (subSortKey === key) {
-      sortAsc = !sortAsc;
-    } else {
-      subSortKey = key;
-      sortAsc = true;
-    }
-    render();
-    return;
-  }
-
-  if (currentSort === key) {
-    sortAsc = !sortAsc;
   } else {
-    currentSort = key;
-    sortAsc = true;
+    const existing = sortLevels.find(l => l.key === key);
+    if (existing) {
+      existing.asc = !existing.asc;
+    } else {
+      sortLevels.push({ key, asc: true, group: false });
+    }
   }
+
+  saveSortLevels();
   render();
 };
 
-window.togglePrimaryName = () => {
-  primarySort = primarySort === "name" ? null : "name";
+// ================= 並び替え設定モーダル =================
+window.openSortModal = () => {
+  workingLevels = sortLevels.map(l => ({ ...l }));
+  renderSortModal();
+  document.getElementById("sortModal").style.display = "block";
+  lockScroll();
+};
 
-  const btn = document.getElementById("primaryBtn");
-  btn.textContent = primarySort === "name" ? "名前固定ON" : "名前固定OFF";
-  btn.classList.toggle("active", primarySort === "name");
+window.closeSortModal = () => {
+  document.getElementById("sortModal").style.display = "none";
+  unlockScroll();
+};
 
+window.addSortLevel = () => {
+  const usedKeys = workingLevels.map(l => l.key);
+  const next = columnDefs.find(c => !usedKeys.includes(c.key)) || columnDefs[0];
+  workingLevels.push({ key: next.key, asc: true, group: false });
+  renderSortModal();
+};
+
+window.removeSortLevel = (i) => {
+  workingLevels.splice(i, 1);
+  renderSortModal();
+};
+
+window.moveSortLevel = (i, dir) => {
+  const j = i + dir;
+  if (j < 0 || j >= workingLevels.length) return;
+  [workingLevels[i], workingLevels[j]] = [workingLevels[j], workingLevels[i]];
+  renderSortModal();
+};
+
+window.updateSortLevelKey = (i, key) => {
+  workingLevels[i].key = key;
+};
+
+window.toggleSortLevelDir = (i) => {
+  workingLevels[i].asc = !workingLevels[i].asc;
+  renderSortModal();
+};
+
+window.toggleSortLevelGroup = (i) => {
+  workingLevels[i].group = !workingLevels[i].group;
+};
+
+window.applySortLevels = () => {
+  sortLevels = workingLevels.length
+    ? workingLevels.map(l => ({ ...l }))
+    : [{ key: "no", asc: true, group: false }];
+  saveSortLevels();
+  closeSortModal();
   render();
 };
+
+function renderSortModal(){
+  const container = document.getElementById("sortLevelList");
+
+  if (!workingLevels.length) {
+    container.innerHTML = `<p class="empty-hint">条件がありません。「＋ 条件を追加」から作成してください。</p>`;
+    return;
+  }
+
+  container.innerHTML = workingLevels.map((level, i) => `
+    <div class="sort-level-row">
+      <span class="sort-level-badge">${i + 1}</span>
+      <select onchange="updateSortLevelKey(${i}, this.value)">
+        ${columnDefs.map(c => `<option value="${c.key}" ${c.key === level.key ? "selected" : ""}>${c.label}</option>`).join("")}
+      </select>
+      <button class="chip-btn" onclick="toggleSortLevelDir(${i})">${level.asc ? "▲ 昇順/多い順" : "▼ 降順/少ない順"}</button>
+      <label class="sort-group-toggle">
+        <input type="checkbox" ${level.group ? "checked" : ""} onchange="toggleSortLevelGroup(${i})"> 件数でグループ化
+      </label>
+      <div class="sort-level-actions">
+        <button class="icon-mini" onclick="moveSortLevel(${i},-1)" ${i === 0 ? "disabled" : ""} title="上へ">↑</button>
+        <button class="icon-mini" onclick="moveSortLevel(${i},1)" ${i === workingLevels.length - 1 ? "disabled" : ""} title="下へ">↓</button>
+        <button class="icon-mini danger" onclick="removeSortLevel(${i})" title="削除">✕</button>
+      </div>
+    </div>
+  `).join("");
+}
 
 // ================= モーダル（追加／編集） =================
 window.openModal = (isEdit = false) => {
@@ -587,61 +674,7 @@ window.exportCSV = async () => {
 
   if (data.length === 0) { showToast("データがありません", "error"); return; }
 
-  data = data.sort((a, b) => {
-
-    if (primarySort === "name") {
-      const countMap = {};
-      lastSnapshot.forEach(d => {
-        const n = d.name || "";
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-
-      const countA = countMap[a.name || ""] || 0;
-      const countB = countMap[b.name || ""] || 0;
-
-      if (countA !== countB) return nameSortAsc ? countB - countA : countA - countB;
-
-      const nameCompare = String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
-      if (nameCompare !== 0) return nameCompare;
-
-      let A = a[subSortKey] ?? "";
-      let B = b[subSortKey] ?? "";
-      const numA = Number(A);
-      const numB = Number(B);
-      const isNum = !isNaN(numA) && !isNaN(numB);
-      if (isNum) return sortAsc ? numA - numB : numB - numA;
-      return String(A).localeCompare(String(B), "ja", { numeric: true });
-    }
-
-    if (currentSort === "name") {
-      const countMap = {};
-      lastSnapshot.forEach(d => {
-        const n = d.name || "";
-        countMap[n] = (countMap[n] || 0) + 1;
-      });
-
-      const countA = countMap[a.name || ""] || 0;
-      const countB = countMap[b.name || ""] || 0;
-
-      if (countA !== countB) return nameSortAsc ? countB - countA : countA - countB;
-      return String(a.name).localeCompare(String(b.name), "ja", { numeric: true });
-    }
-
-    let A = a[currentSort] ?? "";
-    let B = b[currentSort] ?? "";
-    const numA = Number(A);
-    const numB = Number(B);
-    const isNum = !isNaN(numA) && !isNaN(numB);
-    if (isNum) return sortAsc ? numA - numB : numB - numA;
-
-    if (currentSort === "date") {
-      return sortAsc ? new Date(A) - new Date(B) : new Date(B) - new Date(A);
-    }
-
-    return sortAsc
-      ? String(A).localeCompare(String(B), "ja", { numeric: true })
-      : String(B).localeCompare(String(A), "ja", { numeric: true });
-  });
+  data = data.sort(multiCompare);
 
   const headers = [
     "no","main","package","sub","name","work",
