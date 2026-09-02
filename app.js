@@ -367,13 +367,16 @@ function multiCompare(a, b){
 }
 
 // ================= 並び替え条件を文章化 =================
+// 列の種類ごとに「asc」が意味する向きの言葉を返す（グループ化＝件数、日付＝新旧、それ以外＝昇降）
+function sortDirectionWord(level){
+  if (level.group) return level.asc ? "多い順" : "少ない順";
+  if (level.key === "date") return level.asc ? "古い順" : "新しい順";
+  return level.asc ? "昇順" : "降順";
+}
 function levelLabel(level){
   const def = columnDefs.find(c => c.key === level.key);
   const name = def ? def.label : level.key;
-
-  if (level.group) return `${name}(${level.asc ? "多い順" : "少ない順"})`;
-  if (level.key === "date") return `${name}(${level.asc ? "古い順" : "新しい順"})`;
-  return `${name}(${level.asc ? "昇順" : "降順"})`;
+  return `${name}(${sortDirectionWord(level)})`;
 }
 function describeSortLevels(levels){
   return levels.map(levelLabel).join(" → ");
@@ -542,7 +545,7 @@ function renderSortModal(){
           <button class="icon-mini danger" onclick="removeSortLevel(${i})" title="削除">✕</button>
         </div>
       </div>
-      <button class="chip-btn full-mobile" onclick="toggleSortLevelDir(${i})">${level.asc ? "▲ 昇順 / 多い順" : "▼ 降順 / 少ない順"}</button>
+      <button class="chip-btn full-mobile" onclick="toggleSortLevelDir(${i})">${level.asc ? "▲" : "▼"} ${sortDirectionWord(level)}</button>
       <label class="sort-group-toggle">
         <input type="checkbox" ${level.group ? "checked" : ""} onchange="toggleSortLevelGroup(${i})">
         <span>同じ値をまとめる（例：同じ名前をひとかたまりにして、件数の多い順に並べる）</span>
